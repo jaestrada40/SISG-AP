@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SISG · Administración de Proyectos</title>
+<meta name="description" content="Presentación interactiva del plan de gestión del proyecto SISG (Grupo 4) para el curso Administración de Proyectos Tecnológicos: metodología, planificación, riesgos, calidad y normas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
+<style>
+/* SISG-APT · Presentación del plan de gestión. Papel crema, tinta oscura, tipografía monoespaciada, sombras duras. */
+:root {
+  --paper: #f4ebe0; --card: #faf4ea; --ink: #1d1b18; --muted: #6f6961; --line: rgba(29, 27, 24, .16);
+  --lime: #cfe3b2; --lav: #ddd3f2; --sky: #d6e6f5; --rose: #f6d3cf; --sun: #f6e2a8;
+  --c-orange: #f3b17a; --c-blue: #a9c8ee; --c-purple: #c9b8ee; --c-green: #b9d99a; --c-pink: #f0a4a8; --c-teal: #8fd0c4; --c-yellow: #f6d98a;
+  --ok: #2f7d32; --warn: #a8741a; --bad: #b3392f;
+  --shadow: 3px 3px 0 var(--ink);
+  --font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --paper: #1a1815; --card: #23201c; --ink: #efe6d8; --muted: #a39a8c; --line: rgba(239, 230, 216, .18);
+  --lime: #4d6035; --lav: #3f3860; --sky: #2e4560; --rose: #61363a; --sun: #5e5028; --shadow: 3px 3px 0 #000;
+  --ok: #8fd18f; --warn: #e0b45a; --bad: #f08a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 13px/1.55 var(--font); overflow: hidden; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+code { font-family: var(--font); padding: 0 5px; border-radius: 5px; background: rgba(29, 27, 24, .09); font-size: .93em; }
+kbd { font: 600 12px var(--font); padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 6px; background: var(--card); }
+small { color: var(--muted); }
+
+#app { height: 100%; display: grid; grid-template-rows: 56px minmax(0, 1fr); }
+.top { display: flex; align-items: center; gap: 14px; padding: 0 20px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; white-space: nowrap; }
+.brand svg { width: 30px; height: 30px; } .brand mark { background: var(--lime); padding: 0 4px; color: inherit; }
+.top .grow { flex: 1; }
+.icon-btn { display: grid; place-items: center; width: 36px; height: 36px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); }
+.icon-btn:hover { border-color: var(--ink); } .icon-btn svg { width: 18px; height: 18px; }
+body.dk-full .top { display: none; } body.dk-full #app { grid-template-rows: minmax(0, 1fr); }
+
+/* ---------- motor ---------- */
+#deck { display: flex; flex-direction: column; min-height: 0; background: var(--paper); }
+.dk-top { display: flex; align-items: center; gap: 12px; padding: 6px 18px; border-bottom: 1px solid var(--line); font-size: 12px; }
+.dk-top .grow { flex: 1; } .dk-count { font-weight: 800; letter-spacing: .08em; } .dk-name { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 44vw; }
+.dk-top button { padding: 5px 12px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--card); font-size: 12px; font-weight: 600; }
+.dk-top button:hover { border-color: var(--ink); background: var(--lime); }
+.dk-view { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.dk-slide { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; transform-origin: center; background: var(--paper); border: 1.5px solid var(--line); border-radius: 18px; overflow: hidden; font-size: 16px; }
+.dk-bar { height: 4px; background: var(--line); } .dk-bar i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .35s; }
+#dk-index { position: absolute; right: 14px; top: 94px; z-index: 20; width: 380px; max-height: 72vh; overflow-y: auto; padding: 12px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); box-shadow: 5px 5px 0 var(--ink); }
+#dk-index h3 { margin: 2px 6px 8px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+#dk-index button { display: flex; gap: 10px; width: 100%; padding: 5px 8px; border: 0; border-radius: 7px; background: none; text-align: left; font-size: 12px; }
+#dk-index button:hover, #dk-index button[aria-current="true"] { background: var(--lime); color: #1d1b18; } #dk-index i { font-style: normal; color: var(--muted); font-weight: 700; }
+
+.sl-head { position: absolute; left: 48px; right: 48px; top: 22px; display: flex; flex-direction: column; gap: 7px; }
+.kick { align-self: flex-start; padding: 2px 11px; border: 1.5px solid var(--ink); border-radius: 99px; background: var(--c, var(--sun)); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #1d1b18; }
+.sl-head h1 { margin: 0; font-size: 33px; line-height: 1.1; font-weight: 800; letter-spacing: -.01em; }
+.sl-body { position: absolute; left: 48px; right: 48px; top: 98px; bottom: 30px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.is-cover .sl-body { left: 0; right: 0; top: 0; bottom: 0; }
+.sl-dots { position: absolute; right: 48px; bottom: 10px; display: flex; gap: 6px; }
+.sl-dots i { width: 8px; height: 8px; border: 1.5px solid var(--ink); border-radius: 50%; } .sl-dots i.on { background: var(--ink); }
+
+/* ---------- piezas comunes ---------- */
+.foot { margin: auto 0 0; color: var(--muted); font-size: 12px; max-width: 150ch; }
+.card { padding: 16px 18px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); min-width: 0; }
+.card h3, .alc h3, .scr h3 { margin: 0 0 8px; font-size: 16px; }
+.card p { margin: 0 0 8px; } .card ul, .alc ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 5px; }
+.badge { display: inline-block; padding: 1px 10px; border: 1.5px solid var(--ink); border-radius: 99px; background: var(--sun); color: #1d1b18; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.badge.ok { background: var(--lime); } .badge.run { background: var(--sun); } .badge.pend { background: var(--rose); }
+.badge.crit { background: #e8736b; } .badge.alto { background: var(--c-orange); } .badge.medio { background: var(--sun); } .badge.bajo { background: var(--lime); }
+.call { padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--lav); font-size: 14px; } .call > b:first-child { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+.call.warn { background: var(--rose); } .call.info { background: var(--sky); } .call.ok { background: var(--lime); } .call.gold { background: var(--sun); }
+.call, .call b, .call * { color: #1d1b18; }
+.mut { color: var(--muted); }
+.tag { display: inline-block; padding: 1px 10px; border: 1.5px solid var(--ink); border-radius: 99px; background: var(--lav); color: #1d1b18; font-size: 11px; font-weight: 700; }
+
+.dt { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.dt th { padding: 6px 9px; text-align: left; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--card); border-bottom: 2px solid var(--ink); white-space: nowrap; position: sticky; top: 0; }
+.dt td { padding: 6px 9px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.dt td.n { text-align: right; font-variant-numeric: tabular-nums; } .dt tr.clk { cursor: pointer; } .dt tr.clk:hover td, .dt tr.sel td { background: var(--lime); color: #1d1b18; }
+.dt tr:nth-child(even) td { background: rgba(29, 27, 24, .03); } .dt tr.clk.sel td { background: var(--lime); }
+
+/* portada */
+.cv { display: grid; grid-template-columns: 740px 1fr; height: 100%; align-items: center; }
+.cv-t { padding: 0 0 0 64px; display: flex; flex-direction: column; gap: 14px; }
+.cv-k { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.cv h1 { margin: 0; font-size: 54px; line-height: 1.02; letter-spacing: -.02em; font-weight: 800; } .cv mark { background: var(--lime); color: inherit; padding: 0 8px; }
+.cv p { margin: 0; font-size: 18px; max-width: 36ch; } .cv-team { display: flex; flex-wrap: wrap; gap: 8px; } .cv-team span { padding: 3px 12px; border: 1.5px solid var(--ink); border-radius: 99px; background: var(--card); font-size: 12.5px; font-weight: 600; }
+.cv-hint { margin-top: 10px; color: var(--muted); font-size: 13px; }
+.cv-route { list-style: none; margin: 0; padding: 0 48px 0 0; display: flex; flex-direction: column; gap: 10px; counter-reset: none; }
+.cv-route li { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); opacity: .5; transition: .35s; }
+.cv-route li i { display: grid; place-items: center; width: 40px; height: 40px; border: 2px solid var(--ink); border-radius: 50%; background: var(--c-red, #9b2335); color: #fff; font: 800 13px var(--font); font-style: normal; flex: none; }
+.cv-route li:first-child i { background: #14203b; } .cv-route li span { font-weight: 700; font-size: 16px; }
+.cv-route li.on { opacity: 1; border-color: var(--ink); box-shadow: 4px 4px 0 var(--ink); transform: translateX(-10px); background: var(--lime); color: #1d1b18; }
+
+/* agenda */
+.agenda { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.ag { display: flex; flex-direction: column; gap: 6px; padding: 16px; text-align: left; border: 2px solid var(--line); border-radius: 14px; background: var(--card); opacity: .45; transition: .35s; min-height: 170px; }
+.ag.on { opacity: 1; border-color: var(--ink); background: var(--c); color: #1d1b18; box-shadow: 4px 4px 0 var(--ink); }
+.ag-n { display: grid; place-items: center; width: 28px; height: 28px; border: 1.5px solid var(--ink); border-radius: 50%; background: var(--card); color: var(--ink); font-weight: 800; }
+.ag b { font-size: 19px; } .ag small { color: inherit; opacity: .85; font-size: 12.5px; } .ag em { margin-top: auto; font-style: normal; font-size: 11px; font-weight: 700; }
+.agenda-note { margin: 4px 0 0; color: var(--muted); }
+
+/* contexto */
+.ctx { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 14px; flex: 1; min-height: 0; }
+.ctx > section { opacity: .15; transform: translateY(10px); transition: .5s; } .ctx > section.on { opacity: 1; transform: none; }
+.c-a { border-top: 12px solid var(--c-orange); } .c-b { border-top: 12px solid var(--c-pink); } .c-c { border-top: 12px solid var(--c-green); }
+.two-c { margin-top: 14px; padding: 10px 12px; border: 1.5px solid var(--ink); border-radius: 10px; background: var(--sky); color: #1d1b18; font-size: 14px; } .two-c b { display: block; }
+.hl { padding: 10px 12px; border-radius: 10px; background: var(--sun); color: #1d1b18; font-size: 14px; }
+.steps3 { display: flex; align-items: center; gap: 6px; margin: 4px 0 12px; } .steps3 em { font-style: normal; color: var(--muted); font-size: 20px; }
+.s3 { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 10px; border: 2px solid var(--ink); border-radius: 12px; background: var(--c-green); color: #1d1b18; text-align: center; }
+.s3 i { font-style: normal; font-weight: 800; font-size: 20px; } .s3 span { font-size: 11.5px; }
+
+/* objetivos */
+.obj { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.oc { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); opacity: .15; transform: translateY(10px); transition: .45s; min-height: 220px; }
+.oc.on { opacity: 1; transform: none; border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.oc header { display: flex; justify-content: space-between; align-items: center; } .oc header b { font-size: 22px; } .oc p { margin: 0; font-size: 14.5px; }
+.oc footer { margin-top: auto; font-size: 12px; } .oc footer span { color: var(--muted); } .oc small { font-size: 11.5px; }
+
+/* criterios */
+.crit { display: grid; grid-template-columns: 230px 1fr; gap: 24px; flex: 1; min-height: 0; align-items: start; }
+.ring { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px; border: 1.5px solid var(--line); border-radius: 16px; background: var(--card); }
+.ring svg { width: 170px; height: 170px; transform: rotate(-90deg); } .rg-bg { fill: none; stroke: var(--line); stroke-width: 14; } .rg-fg { fill: none; stroke: var(--ok); stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 1.2s ease-out; }
+.rg-n { position: absolute; top: 58px; display: flex; flex-direction: column; align-items: center; } .rg-n b { font-size: 40px; line-height: 1; } .rg-n span { font-size: 11px; color: var(--muted); }
+.ring ul { list-style: none; margin: 8px 0 0; padding: 0; font-size: 12.5px; display: flex; flex-direction: column; gap: 4px; } .d { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--ink); margin-right: 8px; } .d.ok { background: var(--c-green); } .d.run { background: var(--c-yellow); } .d.pend { background: var(--c-pink); }
+.cl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.cl li { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 11px 14px; border: 1.5px solid var(--line); border-left: 8px solid var(--c-yellow); border-radius: 12px; background: var(--card); animation: up .5s ease-out both; animation-delay: var(--d); }
+.cl li.ok { border-left-color: var(--c-green); } .cl li.pend { border-left-color: var(--c-pink); } .cl li i { font-style: normal; font-weight: 800; font-size: 18px; } .cl li b { display: block; font-size: 14px; } .cl li span { color: var(--muted); font-size: 12.5px; }
+@keyframes up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* alcance */
+.alc { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 14px; }
+.alc section { padding: 16px 18px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); opacity: .12; transform: translateY(10px); transition: .5s; } .alc section.on { opacity: 1; transform: none; box-shadow: 4px 4px 0 var(--ink); }
+.alc .in { border-top: 14px solid var(--c-green); } .alc .out { border-top: 14px solid var(--c-pink); } .alc .prj { grid-column: 1 / -1; border-top: 14px solid var(--c-blue); }
+.alc h3 small { font-weight: 400; margin-left: 8px; font-size: 12px; } .alc li { font-size: 14px; } .alc .prj p { margin: 0; font-size: 14.5px; }
+
+/* entregables */
+.ent { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.ent article { padding: 14px 16px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); opacity: .15; transition: .45s; min-height: 140px; } .ent article.on { opacity: 1; border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.ent header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; } .ent header b { font-size: 16px; } .ent p { margin: 0; font-size: 14px; }
+
+/* supuestos */
+.sup { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } .sup section { opacity: .12; transform: translateY(10px); transition: .5s; } .sup section.on { opacity: 1; transform: none; }
+.sup li { font-size: 13.5px; } .roles .role { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 6px 0; border-bottom: 1px solid var(--line); } .roles .role span { grid-column: 1; color: var(--muted); font-size: 12.5px; } .roles .role .badge { grid-row: 1 / 3; grid-column: 2; align-self: center; } .roles small { display: block; margin-top: 8px; }
+
+/* hitos */
+.tl { position: relative; height: 270px; margin: 8px 0 4px; }
+.tl-line { position: absolute; left: 3%; right: 1%; top: 127px; height: 8px; border: 1.5px solid var(--ink); border-radius: 99px; background: var(--card); overflow: hidden; } .tl-line i { display: block; height: 100%; width: 0; background: var(--c-green); transition: width .7s; }
+.tl-m { position: absolute; width: 150px; margin-left: -75px; text-align: center; opacity: 0; transition: .4s; font-size: 12.5px; } .tl-m.on { opacity: 1; } .tl-m .dot { position: absolute; left: 50%; margin-left: -9px; width: 18px; height: 18px; border: 2px solid var(--ink); border-radius: 50%; background: var(--c-yellow); }
+.tl-m.up { top: 0; height: 116px; display: flex; flex-direction: column; justify-content: flex-end; } .tl-m.up .dot { bottom: -24px; } .tl-m.dn { top: 150px; } .tl-m.dn .dot { top: -28px; }
+.call strong { font-weight: 800; }
+.tl-m b { display: block; font-size: 13px; } .tl-m small { display: block; line-height: 1.3; }
+.tl-now { position: absolute; top: 104px; width: 0; border-left: 3px dashed var(--bad); height: 52px; z-index: 2; } .tl-now span { position: absolute; top: 54px; left: -18px; padding: 0 8px; border-radius: 99px; background: var(--bad); color: #fff; font-size: 11px; font-weight: 700; }
+
+/* híbrido */
+.hyb { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; } .hyb > * { transition: .5s; } .hy-route, .hy-adj, .gold { opacity: .12; transform: translateY(8px); } .hy-route.on, .hy-adj.on, .gold.on { opacity: 1; transform: none; }
+.hy-bands { display: grid; grid-template-columns: 1fr 5fr; gap: 8px; } .hy-bands span { padding: 4px 12px; border-radius: 6px; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .06em; } .pred { background: #14203b; } .agil { background: #9b2335; }
+.hy-route { list-style: none; margin: 0; padding: 0; display: flex; align-items: stretch; gap: 4px; }
+.hy-route li { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); } .hy-route li i { font: 800 15px var(--font); font-style: normal; color: #9b2335; } .hy-route li:first-child i { color: #14203b; }
+.hy-route li b { font-size: 13.5px; } .hy-route li small { font-size: 11px; line-height: 1.3; } .hy-route li.ok { background: var(--lime); color: #1d1b18; } .hy-route li.run { background: var(--sun); color: #1d1b18; } .hy-route li.ok small, .hy-route li.run small { color: #3b3a36; }
+.hy-m { align-self: center; color: var(--muted); }
+.hy-adj { display: grid; gap: 6px; } .adj { display: grid; grid-template-columns: 150px 1fr 1.7fr; gap: 12px; align-items: center; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); font-size: 13px; } .adj .was { color: var(--muted); } .adj .now { font-weight: 600; }
+
+/* scrum */
+.scr { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } .scr article { padding: 16px 18px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); border-left: 12px solid #9b2335; opacity: .12; transition: .5s; } .scr article.on { opacity: 1; box-shadow: 4px 4px 0 var(--ink); }
+.scr p { margin: 0 0 10px; font-size: 14px; } .sisg { padding: 10px 12px; border-radius: 10px; background: var(--sky); color: #1d1b18; font-size: 13.5px; } .sisg span { display: block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; font-weight: 800; }
+
+/* etapas */
+.eta { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; flex: 1; min-height: 0; } .eta-t { overflow: auto; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--card); align-self: start; max-height: 420px; }
+.eta-d { padding: 16px 18px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); box-shadow: 4px 4px 0 var(--ink); overflow: auto; } .eta-d h3 { margin: 8px 0 6px; font-size: 21px; } .eta-d h4 { margin: 10px 0 2px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); } .eta-d p { margin: 0; font-size: 14px; } .dod { padding: 8px 10px; border-radius: 8px; background: var(--lime); color: #1d1b18; }
+
+/* backlog */
+.bk { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; flex: 1; min-height: 0; } .bk section { display: flex; flex-direction: column; gap: 10px; }
+.bk h3 { margin: 0; padding: 4px 12px; border-radius: 8px; font-size: 13px; color: #1d1b18; border: 1.5px solid var(--ink); } .p-alta { background: var(--c-pink); } .p-media { background: var(--c-yellow); } .p-baja { background: var(--c-green); }
+.bkc { display: flex; flex-direction: column; gap: 4px; padding: 9px 13px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); opacity: .12; transform: translateY(8px); transition: .45s; } .bkc.on { opacity: 1; transform: none; border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.bkc header { display: flex; justify-content: space-between; align-items: center; gap: 8px; } .bkc header b { font-size: 16px; } .bkc header .badge { font-size: 10.5px; white-space: normal; text-align: right; } .bkc p { margin: 0; font-size: 13px; line-height: 1.4; } .bkc small { font-size: 11.5px; line-height: 1.35; }
+.bk h3 { padding: 3px 12px; }
+
+/* ===== riesgos, calidad y cierre ===== */
+.cic { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; min-height: 0; } .cic article, .dom article, .inv article, .ctg article, .les article, .ia-t > div { opacity: .12; transform: translateY(10px); transition: .5s; transition-delay: var(--d, 0ms); } .cic article.on, .dom article.on, .inv article.on, .ctg article.on, .ia-t > div.on { opacity: 1; transform: none; } .les article { opacity: 1; transform: none; }
+.cic article { padding: 12px 14px; border: 2px solid var(--ink); border-top: 10px solid var(--c); border-radius: 12px; background: var(--card); font-size: 12px; overflow: auto; } .cic header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; } .cic header i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--c); border: 2px solid var(--ink); font-style: normal; font-weight: 800; color: #1d1b18; } .cic header b { font-size: 17px; } .cic p { margin: 0; line-height: 1.5; }
+.mz { display: grid; grid-template-columns: 470px 1fr; gap: 22px; flex: 1; min-height: 0; } .mz-g { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 3px; width: 430px; height: 400px; margin-left: 24px; } .mc { border: 2px solid var(--ink); border-radius: 8px; display: flex; flex-wrap: wrap; gap: 4px; align-content: center; justify-content: center; padding: 4px; } .ya, .xa { position: absolute; font-size: 11px; font-weight: 700; } .ya { left: -24px; top: 50%; transform: rotate(-90deg) translateX(-50%); transform-origin: left top; white-space: nowrap; } .xa { right: 0; bottom: -20px; }
+.rp { min-width: 36px; padding: 3px 6px; border: 2px solid var(--ink); border-radius: 99px; background: var(--c); color: #1d1b18; font-weight: 800; font-size: 12px; } .rp.sel { box-shadow: 0 0 0 3px var(--ink); }
+.mz-d { display: flex; flex-direction: column; gap: 12px; } .mz-rbs { display: flex; flex-wrap: wrap; gap: 5px; } .mz-rbs h4 { width: 100%; margin: 0; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); } .rb { padding: 2px 9px; border: 1.5px solid var(--line); border-radius: 99px; background: var(--card); font-size: 11px; }
+.mz-i, .rg-d, .nrm-d, .qa-d { padding: 14px 18px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); box-shadow: 4px 4px 0 var(--ink); align-self: start; } .mz-i h3, .rg-d h3, .nrm-d h3, .qa-d h3 { margin: 8px 0 4px; font-size: 16px; } .rg-d h4, .nrm-d h4 { margin: 10px 0 2px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); } .mz-i p, .rg-d p, .nrm-d p, .qa-d p { margin: 3px 0; font-size: 13.5px; line-height: 1.5; }
+.rg { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; } .rg-b { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; min-height: 0; } .rg-t { overflow: auto; max-height: 440px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--card); } .rg-t .dt { font-size: 11.5px; } .rg-t .dt td, .rg-t .dt th { padding: 4px 8px; } tr.sel td { background: var(--lime); color: #1d1b18; }
+.nst { display: flex; flex-direction: column; gap: 12px; flex: 1; } .nst-f { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; } .nb { padding: 10px 14px; border: 2px solid var(--ink); border-left: 10px solid var(--c); border-radius: 12px; background: var(--card); animation: up .5s both; animation-delay: var(--d); } .nb small { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); } .nb p { margin: 3px 0 0; font-size: 12.5px; line-height: 1.45; } @keyframes up { from { opacity: 0; transform: translateY(8px); } }
+.ctg { display: grid; grid-template-columns: 1.7fr 1fr; gap: 16px; flex: 1; min-height: 0; } .ctg h3 { margin: 0 0 8px; font-size: 15px; } .ctg article { padding: 9px 13px; margin-bottom: 8px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); font-size: 12px; } .ctg section:first-child article { display: grid; grid-template-columns: 34px 1fr 20px 1fr 54px; gap: 10px; align-items: center; } .ctg small { font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); } .ctg p { margin: 2px 0 0; } .arr { font-size: 20px; font-weight: 800; } .ctg em { font-style: normal; font-weight: 700; color: var(--muted); } .op article { background: var(--lime); color: #1d1b18; } .op article small { color: #3b3a36; text-transform: none; font-size: 12px; letter-spacing: 0; }
+.inv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex: 1; min-height: 0; } .inv article { padding: 12px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); font-size: 11.5px; overflow: auto; } .inv header { display: flex; align-items: baseline; gap: 8px; } .inv header i { font-style: normal; font-weight: 800; padding: 1px 8px; border-radius: 6px; background: var(--c-blue); color: #1d1b18; } .inv header small { color: var(--muted); } .inv h4 { margin: 8px 0 2px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); } .inv p { margin: 0; line-height: 1.45; }
+.ql { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; } .ql-s { display: flex; gap: 8px; } .ql-t { overflow: auto; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--card); } .ql-t .dt { font-size: 11px; } .ql-t .dt td, .ql-t .dt th { padding: 4px 8px; } .ql-t small { display: block; color: var(--muted); }
+.dom { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; align-content: start; } .dom article { padding: 12px 14px; border: 2px solid var(--ink); border-top: 10px solid var(--c); border-radius: 12px; background: var(--card); font-size: 12px; } .dom b { display: block; font-size: 15px; } .dom em { display: block; margin: 3px 0 6px; font-style: normal; color: var(--muted); } .dom p { margin: 0; }
+.nrm { display: grid; grid-template-columns: 330px 1fr; gap: 18px; flex: 1; min-height: 0; } .nrm-l { display: flex; flex-direction: column; gap: 5px; overflow: auto; } .nrm-l button, .qa-l button { padding: 6px 12px; text-align: left; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); font-size: 12px; font-weight: 600; } .nrm-l button.sel, .qa-l button.sel { background: var(--lime); border-color: var(--ink); color: #1d1b18; box-shadow: 2px 2px 0 var(--ink); }
+.qa { display: grid; grid-template-columns: 520px 1fr; gap: 18px; flex: 1; min-height: 0; } .qa-l { display: flex; flex-direction: column; gap: 4px; overflow: auto; max-height: 480px; } .qa-l button { font-size: 11.5px; padding: 4px 10px; } .qa-d h3 { font-size: 18px; } .qa-d p { font-size: 15px; }
+.sus { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; flex: 1; min-height: 0; } .sus-l h3 { margin: 0 0 6px; font-size: 15px; } .sus-l h3 small { font-weight: 400; color: var(--muted); } .sus-l label { display: grid; grid-template-columns: 1fr 100px 18px; gap: 8px; align-items: center; padding: 3px 10px; margin-bottom: 3px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); font-size: 11px; } .sus-r .gauge { max-width: 250px; margin: 0 auto; } .sus-r h4 { margin: 8px 0 4px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); } .df { padding: 3px 10px; margin-bottom: 3px; font-size: 10.5px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--card); font-size: 11.5px; } .df b { display: block; } .df span { color: var(--muted); }
+.ia { display: flex; flex-direction: column; gap: 12px; } .ia-t { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .ia-t > div { padding: 7px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); font-size: 11px; line-height: 1.38; } .ia-t > div:nth-child(2) { grid-row: span 2; } .ia-t p { margin: 2px 0 0; }
+.pnd { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .pd { display: flex; gap: 10px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); font-size: 12.5px; cursor: pointer; } .pd small { display: block; color: var(--muted); margin-top: 2px; } .pd.done { background: var(--lime); color: #1d1b18; border-color: var(--ink); } .pd.done small { color: #3b3a36; } .pd input { accent-color: var(--ink); width: 18px; height: 18px; flex: none; }
+.les { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; } .les section { padding: 12px 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--c); color: #1d1b18; box-shadow: 4px 4px 0 var(--ink); } .les h3 { margin: 0 0 6px; font-size: 16px; } .les ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; font-size: 13px; line-height: 1.4; }
+.refs { margin: 0; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.5; }
+.fin { display: flex; flex-direction: column; gap: 16px; } .fin-k { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; } .fin-k div { padding: 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--c-yellow); color: #1d1b18; box-shadow: 4px 4px 0 var(--ink); opacity: .15; transform: translateY(12px); transition: .6s; transition-delay: var(--d); } .fin-k div.on { opacity: 1; transform: none; } .fin-k b { display: block; font-size: 32px; } .fin-k span { font-size: 12px; }
+
+/* ===== botones, chips y controles ===== */
+.btn { padding: 6px 14px; border: 1.5px solid var(--ink); border-radius: 8px; background: var(--card); font-weight: 600; font-size: 12.5px; } .btn:hover { background: var(--lime); color: #1d1b18; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; } .chip { padding: 4px 13px; border: 1.5px solid var(--line); border-radius: 99px; background: var(--card); font-size: 12px; font-weight: 600; } .chip[aria-pressed="true"] { background: var(--lime); border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); color: #1d1b18; }
+input[type="range"] { accent-color: var(--ink); } input[type="number"] { padding: 5px 8px; border: 1.5px solid var(--ink); border-radius: 8px; background: var(--card); color: var(--ink); font: inherit; width: 100%; }
+
+/* ===== EDT ===== */
+.edt { display: grid; grid-template-columns: 250px 1fr; gap: 16px; flex: 1; min-height: 0; align-items: start; }
+.edt-root { padding: 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--c-orange); color: #1d1b18; box-shadow: 4px 4px 0 var(--ink); display: flex; flex-direction: column; gap: 4px; } .edt-root > span { font-size: 30px; font-weight: 800; } .edt-root b { font-size: 17px; } .edt-root em { font-style: normal; font-size: 15px; } .edt-root strong { font-size: 44px; line-height: 1; } .edt-root small { color: #3b3a36; }
+.edt-br { display: flex; flex-direction: column; gap: 9px; }
+.edt-g { padding: 8px 12px; border: 2px solid var(--line); border-left: 12px solid var(--c); border-radius: 12px; background: var(--card); opacity: .12; transform: translateX(14px); transition: .5s; transition-delay: var(--d); } .edt-g.on { opacity: 1; transform: none; border-color: var(--ink); border-left-color: var(--c); }
+.edt-g header { position: relative; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding-bottom: 6px; } .edt-g header b { font-size: 14.5px; } .edt-g header span { font-size: 12px; color: var(--muted); } .edt-g header i { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--c); border-radius: 2px; border: 1px solid var(--ink); }
+.edt-p { display: flex; flex-wrap: wrap; gap: 6px; } .pk { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--paper); font-size: 11.5px; } .pk i { font-style: normal; font-weight: 800; color: var(--muted); } .pk b { padding: 0 6px; border-radius: 5px; background: var(--c-yellow); color: #1d1b18; }
+
+/* ===== diccionario ===== */
+.dic { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; } .dic-top { display: flex; justify-content: space-between; align-items: center; gap: 14px; } .dic-sum { display: flex; gap: 16px; font-size: 12.5px; color: var(--muted); } .dic-sum b { color: var(--ink); font-size: 15px; }
+.dic-t { overflow: auto; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--card); flex: 1; min-height: 0; } .dic-t .dt { font-size: 12px; } .dic-t .dt td, .dic-t .dt th { padding: 4px 9px; }
+.pb { position: relative; height: 16px; min-width: 110px; border: 1.5px solid var(--ink); border-radius: 99px; background: var(--paper); overflow: hidden; } .pb i { position: absolute; inset: 0 auto 0 0; background: var(--c-green); } .pb span { position: relative; display: block; text-align: center; font-size: 10.5px; line-height: 13px; font-weight: 700; color: #1d1b18; }
+
+/* ===== PDM ===== */
+.pdm { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; } .pdm svg { width: 100%; height: 330px; }
+.pe { fill: none; stroke: var(--ink); stroke-width: 2; transition: .4s; } .pe.off { opacity: 0; } .ov { font: 700 11px var(--font); fill: var(--muted); }
+.pn { cursor: pointer; transition: .4s; } .pn rect { stroke: var(--ink); stroke-width: 2; fill: var(--card); } .pn.s0 rect { fill: #f2b3ad; } .pn.s2 rect { fill: var(--c-orange); } .pn.s8 rect { fill: var(--c-green); }
+.pn text { fill: #1d1b18; } .t1 { font: 800 12px var(--font); } .t2 { font: 500 11px var(--font); } .t3 { font: 600 10.5px var(--font); }
+.pn.sel rect { stroke-width: 4; } .pn.off { opacity: .1; } .pn.dimm { opacity: .25; }
+.pdm-l { display: flex; gap: 22px; font-size: 12px; color: var(--muted); } .pdm-l i { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--ink); border-radius: 3px; margin-right: 6px; vertical-align: -2px; } .pdm-l i.s0 { background: #f2b3ad; } .pdm-l i.s2 { background: var(--c-orange); } .pdm-l i.s8 { background: var(--c-green); }
+.pdm-d { padding: 10px 14px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--card); } .pdm-d h3 { margin: 0 0 4px; font-size: 15px; } .pdm-d p { margin: 2px 0; font-size: 13px; }
+
+/* ===== PERT ===== */
+.pert { display: grid; grid-template-columns: 1fr 380px; gap: 18px; flex: 1; min-height: 0; } .pert-l h3 { margin: 0 0 8px; font-size: 16px; } .pert-l h3 small { font-weight: 400; margin-left: 8px; }
+.pr { display: grid; grid-template-columns: 22px 200px repeat(3, 1fr) 108px; gap: 10px; align-items: center; padding: 5px 10px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); margin-bottom: 6px; font-size: 12px; } .pid { font-weight: 800; font-size: 15px; } .pnm { line-height: 1.25; }
+.pr label { display: grid; grid-template-columns: 14px 1fr 22px; gap: 4px; align-items: center; font-weight: 700; } .pr label b { text-align: right; } .pe2 { font-style: normal; color: var(--muted); font-size: 11px; text-align: right; }
+.pert-l .btn { margin-top: 4px; } .pert-r { display: flex; flex-direction: column; gap: 10px; }
+.gauge { position: relative; width: 100%; } .gauge svg { width: 100%; } .gb, .gf { fill: none; stroke-width: 16; stroke-linecap: round; } .gb { stroke: var(--line); } .gf { stroke: var(--ok); transition: stroke-dasharray .4s, stroke .4s; }
+.gv { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; } .gv b { display: block; font-size: 44px; line-height: 1; } .gv span { font-size: 11px; color: var(--muted); }
+.pert-r dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; } .pert-r dl div { padding: 6px 10px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); } .pert-r dt { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); } .pert-r dd { margin: 0; font-size: 18px; font-weight: 800; } .fx { margin: 0; font-size: 11.5px; color: var(--muted); }
+
+/* ===== Gantt ===== */
+.gantt { position: relative; display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; }
+.g-ax { position: relative; height: 20px; margin-left: 260px; border-bottom: 2px solid var(--ink); } .g-ax span { position: absolute; top: 0; font-size: 11px; color: var(--muted); transform: translateX(-30%); white-space: nowrap; } .g-ax .end { transform: translateX(-100%); }
+.g-s h4 { margin: 8px 0 3px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.g-r { display: grid; grid-template-columns: 260px 1fr; align-items: center; height: 26px; } .g-n { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; } .g-n b { display: inline-block; width: 18px; }
+.g-t { position: relative; height: 20px; border-left: 1px solid var(--line); } .gl { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--line); }
+.g-b { position: absolute; top: 1px; height: 18px; border: 1.5px solid var(--ink); border-radius: 6px; background: var(--c-blue); transform: scaleX(0); transform-origin: left; transition: transform .6s ease-out; overflow: hidden; } .g-b.on { transform: none; } .g-b.crit { background: #ee8d84; } .g-b span { display: block; padding: 0 6px; font-size: 10.5px; font-weight: 700; color: #1d1b18; line-height: 15px; white-space: nowrap; }
+.g-now { position: absolute; top: 0; bottom: 0; border-left: 3px dashed var(--bad); z-index: 2; } .g-now span { position: absolute; top: -2px; left: -18px; padding: 0 8px; border-radius: 99px; background: var(--bad); color: #fff; font-size: 11px; font-weight: 700; }
+
+/* ===== costos ===== */
+.cost { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; flex: 1; min-height: 0; } .cs-l { display: flex; flex-direction: column; gap: 12px; }
+.bar { display: flex; height: 64px; border: 2px solid var(--ink); border-radius: 12px; overflow: hidden; background: var(--card); } .bar i { display: block; transition: flex .5s; } .bar .b1, .lg .b1 { background: var(--c-blue); } .bar .b2, .lg .b2 { background: var(--c-orange); } .bar .b3, .lg .b3 { background: var(--c-green); } .bar i + i { border-left: 2px solid var(--ink); }
+.lg { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; } .lg i { display: inline-block; width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 4px; margin-right: 8px; vertical-align: -2px; } .lg b { margin-left: 8px; }
+.total { padding: 12px 16px; border: 2px solid var(--ink); border-radius: 12px; background: var(--sun); color: #1d1b18; font-size: 15px; box-shadow: 3px 3px 0 var(--ink); } .total b { font-size: 26px; margin-left: 10px; }
+.cs-r { padding: 16px 18px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); } .cs-r h3 { margin: 0 0 6px; font-size: 17px; } .cs-r p { margin: 6px 0; font-size: 13.5px; }
+.sl { display: block; margin: 10px 0; font-size: 13px; font-weight: 700; } .sl b { float: right; } .sl input { width: 100%; margin-top: 6px; }
+.cov { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 13px; } .cov b { text-align: right; }
+.verd2 { margin: 10px 0; padding: 8px 12px; border: 1.5px solid var(--ink); border-radius: 10px; font-weight: 700; color: #1d1b18; } .verd2.ok { background: var(--lime); } .verd2.bad { background: var(--rose); }
+
+/* ===== valor ganado ===== */
+.evm { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; flex: 1; min-height: 0; } .ev-l { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 14px; align-content: start; overflow: auto; }
+.ev-r { display: grid; grid-template-columns: 1fr 34px 90px 40px; gap: 6px; align-items: center; padding: 3px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); font-size: 11px; } .ev-r > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ev-r code { margin-right: 5px; } .ev-r b { text-align: right; } .ev-r input { width: 90px; }
+.ev-r2 { display: flex; flex-direction: column; gap: 10px; } .kp { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .kp div { padding: 8px 12px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); } .kp small { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; } .kp b { font-size: 24px; }
+.in2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11.5px; font-weight: 700; } .vd p { margin: 3px 0; font-size: 13px; } .okc { color: var(--ok); } .badc { color: var(--bad); }
+
+/* ===== interesados ===== */
+.mx { display: grid; grid-template-columns: 560px 1fr; gap: 20px; flex: 1; min-height: 0; } .mx-p { position: relative; width: 560px; height: 470px; border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; background: var(--card); }
+.q { position: absolute; width: 50%; height: 50%; display: flex; padding: 8px 10px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #1d1b18; opacity: .85; } .q1 { left: 0; top: 0; background: #d6e6f5; } .q2 { left: 50%; top: 0; background: #f6d3cf; } .q3 { left: 0; top: 50%; background: #dcebc8; } .q4 { left: 50%; top: 50%; background: #f6e2a8; }
+.ax { position: absolute; font-size: 11px; color: #1d1b18; font-weight: 700; } .ax.x { right: 10px; bottom: 6px; } .ax.y { left: 8px; top: 50%; transform: rotate(-90deg) translateX(50%); transform-origin: left top; }
+.pt { position: absolute; width: 34px; height: 34px; margin: -17px; border: 2px solid var(--ink); border-radius: 50%; background: var(--c); color: #1d1b18; font-weight: 800; font-size: 12px; opacity: 0; transform: scale(.3); transition: .4s; transition-delay: var(--d); } .mx-p.pts .pt { opacity: 1; transform: none; } .pt:hover, .pt.sel { box-shadow: 0 0 0 4px var(--ink); z-index: 3; }
+.mx-d { padding: 16px 18px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); box-shadow: 4px 4px 0 var(--ink); align-self: start; } .mx-d h3 { margin: 8px 0 2px; font-size: 18px; } .mx-d h4 { margin: 10px 0 2px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); } .mx-d p { margin: 0; font-size: 14px; } .strat { padding: 8px 10px; border-radius: 8px; background: var(--lime); color: #1d1b18; }
+.est { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; min-height: 0; } .est section { display: flex; flex-direction: column; gap: 7px; opacity: .12; transition: .5s; } .est section.on { opacity: 1; } .est h3 { margin: 0; padding: 6px 12px; border: 2px solid var(--ink); border-radius: 10px; background: var(--c); color: #1d1b18; font-size: 14px; } .est h3 small { color: #3b3a36; float: right; }
+.est article { padding: 8px 11px; border: 1.5px solid var(--line); border-left: 6px solid var(--c); border-radius: 10px; background: var(--card); font-size: 12px; } .est article b { display: block; font-size: 12.5px; } .est article span { color: var(--muted); }
+.com { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; flex: 1; min-height: 0; } .com-t { overflow: auto; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--card); align-self: start; max-height: 400px; } .com-t .dt { font-size: 11.5px; } .com-t .dt td, .com-t .dt th { padding: 4px 8px; }
+.com-d { padding: 14px 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--card); box-shadow: 4px 4px 0 var(--ink); align-self: start; } .com-d h3 { margin: 0 0 4px; font-size: 16px; } .com-d h4 { margin: 8px 0 2px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); } .com-d p { margin: 0; font-size: 13px; }
+.reglas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; } .reglas div { display: flex; gap: 10px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--sky); color: #1d1b18; font-size: 12.5px; } .reglas i { font-style: normal; font-weight: 800; }
+.rep { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; } .rep-h { display: grid; grid-template-columns: 1fr 1fr 1.6fr 1fr; gap: 8px; } .rep-h div { padding: 6px 10px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); } .rep-h small { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; } .rep-h b { font-size: 13px; }
+.rep-k { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; opacity: .15; transition: .5s; } .rep-k.on { opacity: 1; } .k { padding: 10px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); color: #1d1b18; } .k.ok { background: var(--lime); } .k.pend { background: var(--rose); } .k small { display: block; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: #3b3a36; } .k b { font-size: 30px; line-height: 1.15; } .k span { display: block; font-size: 11px; color: #3b3a36; }
+.rep-c { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; } .rep-c section { padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); opacity: .12; transition: .5s; } .rep-c section.on { opacity: 1; } .rep-c h3 { margin: 0 0 4px; font-size: 14px; } .rep-c p { margin: 0; font-size: 12.5px; }
+
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3l11 6.5v13L16 29 5 22.5v-13z' fill='%23f6d98a' stroke='%231d1b18' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M5 9.5L16 16l11-6.5M16 16v13' fill='none' stroke='%231d1b18' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <a class="brand" href="#/p/1" aria-label="SISG · Administración de Proyectos, inicio">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3l11 6.5v13L16 29 5 22.5v-13z" fill="#f6d98a" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 9.5L16 16l11-6.5M16 16v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <b>SISG <mark>Administración de Proyectos</mark></b>
+    </a>
+    <span class="grow"></span>
+    <button class="icon-btn" id="b-theme" type="button" aria-label="Cambiar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"/></svg></button>
+  </header>
+  <div id="deck" hidden></div>
+</div>
+<noscript><p style="padding:24px">Esta página necesita JavaScript.</p></noscript>
+<script>
+/* Datos del plan de gestión de SISG, leídos de docs/gestion y docs/PRESENTACION_APT.html. No editar a mano. */
+window.APT = {"objetivos":{"cols":["#","Objetivo (específico, medible, con fecha)"],"rows":[["O1","Modelar las fuentes del Grupo 4 en un ER de tercera forma normal con llaves, restricciones e índices, **entregado el 25 de octubre de 2026**"],["O2","Diseñar un modelo estrella de 2 hechos y 3 dimensiones conformadas, sin datos personales, y **presentarlo el 30 de octubre de 2026**"],["O3","Automatizar el ETL con datos reales de la aplicación y lograr una reconciliación fuente–DW con diferencia 0 **antes del 5 de noviembre de 2026**"],["O4","Responder al menos 8 preguntas de análisis con consultas sobre el modelo estrella **antes del 10 de noviembre de 2026**"],["O5","Completar y validar con el grupo los documentos de gestión (alcance, EDT, cronograma y costos, interesados, comunicaciones, riesgos y calidad) **al 2 de noviembre de 2026**"],["O6","Exponer en la semana 19 (**20–21 de noviembre**) y entregar el proyecto de Bases de Datos II **antes del 28 de noviembre de 2026 a las 8:00**"]]},"hitos":{"cols":["Fecha","Hito"],"rows":[["25 oct. 2026","ER de las fuentes (Bases de Datos II) – entregado"],["30 oct. 2026","Presentación del diseño estrella (Bases de Datos II)"],["2 nov. 2026","Documentos de gestión validados"],["5 nov. 2026","ETL con datos reales de la aplicación"],["10 nov. 2026","Consultas y análisis `EXPLAIN` finales"],["20–21 nov. 2026","Exposición final (Administración de Proyectos, semana 19)"],["22–28 nov. 2026","Examen final de Administración de Proyectos"],["**28 nov. 2026, 8:00**","**Entrega del proyecto final de Bases de Datos II**"]]},"riesgos_principales":{"cols":["Id","Riesgo","Nivel"],"rows":[["R2","El plazo de Bases de Datos II tiene 2 días de holgura y coincide con el examen final","Crítico"],["R12","Fuga de datos de salud de la aplicación (credenciales robadas, descarga masiva)","Alto"],["R5","Sobrecarga de un integrante (equipo de 3 personas)","Alto"],["R8","Omitir la declaración de uso de IA limita la nota al 60%","Alto"],["R4","Otros grupos no definen sus formatos de datos a tiempo","Alto"]]},"roles":{"cols":["Rol","Responsabilidad","Persona"],"rows":[["Líder de proyecto","Planificación, seguimiento y comunicación con docentes","*por asignar*"],["Responsable de datos","ER, modelo estrella, ETL, consultas","*por asignar*"],["Responsable de aplicación y calidad","Aplicación web, pruebas, documentación","*por asignar*"]]},"entregables":{"cols":["Entregable","Criterio de aceptación"],"rows":[["ER de las fuentes","Todas las relaciones con llave foránea; sin texto libre donde corresponde un catálogo"],["Modelo estrella","Grano declarado para cada hecho; dimensiones conformadas compartidas; sin datos personales"],["ETL","`CALL sp_etl_completo()` termina con resultado `OK`; reconciliación en 0"],["Consultas","Cada consulta responde una pregunta de negocio y se ejecuta sin errores"],["Aplicación","Pruebas e2e en verde; las reglas de aislamiento y de tipo de entidad se cumplen"],["Documentos de gestión","Completos según el sílabo; formato IEEE; declaración de uso de IA"]]},"backlog":{"cols":["Id","Historia","Criterio de aceptación","Prioridad"],"rows":[["H1","Como **centro de diagnóstico**, quiero registrar un estudio de un paciente para llevar su historial","El estudio queda ligado al paciente de mi entidad; otra entidad no lo ve","Alta"],["H2","Como **organismo no lucrativo**, quiero registrar una campaña con su lugar y personas atendidas para medir su alcance","La campaña aparece en mi lista y en el panel","Alta"],["H3","Como **centro de diagnóstico**, quiero cargar estudios desde Excel para no digitarlos uno por uno","El archivo se valida y los errores se reportan por fila","Media"],["H4","Como **analista**, quiero consultar totales por mes, tipo y departamento para tomar decisiones","Los resultados coinciden con la fuente (diferencia 0)","Alta"],["H5","Como **administrador de la entidad**, quiero ver quién modificó un estudio para auditar cambios","La bitácora muestra usuario, fecha y cambio","Media"],["H6","Como **usuario móvil**, quiero usar el sistema desde el teléfono","El menú y las tablas se adaptan al ancho de pantalla","Baja"]]},"paquetes":{"cols":["Código","Paquete","Horas","Fechas","Avance","Responsable"],"rows":[["1.1","Acta de constitución y alcance","6","24 oct – 26 oct","50%","Líder"],["1.2","EDT, cronograma y costos","6","24 oct – 27 oct","50%","Líder"],["1.3","Interesados y comunicaciones","5","24 oct – 28 oct","50%","Líder"],["1.4","Riesgos y calidad","6","24 oct – 30 oct","50%","Calidad"],["1.5","Reportes de estado semanales","3","1 nov – 20 nov","0%","Líder"],["2.1","ER de las fuentes","8","15 oct – 25 oct","100%","Datos"],["2.2","Modelo estrella","8","24 oct – 30 oct","80%","Datos"],["2.3","ETL","10","24 oct – 10 nov","70%","Datos"],["2.4","Consultas analíticas","6","24 oct – 14 nov","60%","Datos"],["2.5","Documento técnico BD II","8","9 nov – 27 nov","20%","Datos"],["3.1","Backend y autenticación","25","5 oct – 23 oct","100%","Calidad"],["3.2","Interfaz y rediseño","12","24 oct – 24 oct","100%","Calidad"],["3.3","Carga masiva y bitácora","12","24 oct – 24 oct","100%","Calidad"],["3.4","Seguridad y usuarios","12","24 oct – 24 oct","100%","Calidad"],["4.1","Pruebas e2e","8","5 oct – 24 oct","100%","Calidad"],["4.2","Reconciliación fuente–DW","3","24 oct – 24 oct","100%","Calidad"],["4.3","Revisión por pares y verificación","6","9 nov – 20 nov","0%","Calidad"],["5.1","Informe de cierre y lecciones","8","12 nov – 19 nov","0%","Todos"],["5.2","Preparar y dar la exposición final","10","16 nov – 21 nov","0%","Todos"],["5.3","Ajustes y entrega final BD II","6","23 nov – 28 nov","0%","Datos"]]},"actividades":{"cols":["ID","Actividad","Duración (d)","Predecesoras","ES","EF","LS","LF","Holgura","Fechas"],"rows":[["A","Validar acta, alcance y EDT con el grupo","2","—","0","2","8","10","8","26 oct – 27 oct"],["B","Presentar el diseño estrella (tarea del 30 de oct.)","5","—","0","5","2","7","2","26 oct – 30 oct"],["C","Alimentar el ETL con datos reales de la app","6","B","5","11","7","13","2","31 oct – 5 nov"],["D","Consultas finales y análisis con EXPLAIN","5","C","11","16","13","18","2","6 nov – 10 nov"],["E","Documento técnico de Bases de Datos II","8","D","16","24","18","26","2","11 nov – 18 nov"],["F","Riesgos y calidad finalizados","6","A","2","8","10","16","8","28 oct – 2 nov"],["G","Plan de comunicaciones y reportes de estado","4","A","2","6","12","16","10","28 oct – 31 oct"],["H","Informe de cierre y lecciones aprendidas","5","F,G","8","13","16","21","8","3 nov – 7 nov"],["I","Preparar la exposición final","4","H","13","17","21","25","8","8 nov – 11 nov"],["J","Exposición final (semana 19)","2","I","25","27","25","27","0","20 nov – 21 nov"],["K","Revisión por pares y lista de verificación","5","E(-2)","22","27","24","29","2","17 nov – 21 nov"],["L","Ajustes y entrega final de Bases de Datos II","4","K","27","31","29","33","2","22 nov – 25 nov"]]},"pert":{"cols":["ID","Actividad","O","M","P","Esperado (d)","σ"],"rows":[["B","Presentar el diseño estrella (tarea del 30 de oct.)","3","5","6","4.8","0.5"],["C","Alimentar el ETL con datos reales de la app","4","6","10","6.3","1.0"],["D","Consultas finales y análisis con EXPLAIN","3","5","8","5.2","0.83"],["E","Documento técnico de Bases de Datos II","6","8","12","8.3","1.0"],["K","Revisión por pares y lista de verificación","3","5","7","5.0","0.67"],["L","Ajustes y entrega final de Bases de Datos II","3","4","6","4.2","0.5"]]},"evm":{"cols":["Indicador","Valor","Cómo se obtuvo"],"rows":[["BAC","168 h","Suma de las horas planificadas"],["PV (valor planificado)","86.6 h","Horas de cada paquete × fracción del plazo transcurrido"],["EV (valor ganado)","110.1 h","Horas de cada paquete × % de avance"],["SPI = EV/PV","**1.27**","Mayor que 1: adelantados respecto del plan"],["Avance = EV/BAC","**66%**",""],["AC (costo real)","*pendiente*","**El grupo debe registrar las horas realmente trabajadas**"],["CPI = EV/AC","*pendiente*","Requiere AC"],["EAC = BAC/CPI","*pendiente*","Requiere CPI"]]},"etapas":{"cols":["Etapa","Sprint Goal / objetivo","Paquetes EDT","Definition of Done (resultado verificable)","Estado al 24 oct."],"rows":[["Fase 0 · Preparación (predictiva)","Requisitos, alcance y cronograma de hitos aprobados","1.1 a 1.4, 2.1","Acta, alcance y EDT validados por el grupo; ER de las fuentes entregado","ER entregado; documentos en borrador por validar"],["Sprint 1 · Fuente operativa","Tener una aplicación fuente segura y con datos","3.1 a 3.4, 4.1","100% de pruebas e2e en verde (49 de 49); MFA, roles y auditoría activos","**Hecho**"],["Sprint 2 · Modelo estrella","Diseño del almacén aprobado y presentado","2.2","Presentado el 30 de octubre, sin datos personales en el modelo","En curso"],["Sprint 3 · ETL con datos reales","Cargar los datos de la aplicación al almacén","2.3, 4.2","Reconciliación fuente–DW con diferencia 0 con datos de la aplicación (5 de noviembre)","En curso"],["Sprint 4 · Consultas y documento técnico","Responder las preguntas de análisis","2.4, 2.5","8 consultas sin error con `EXPLAIN`; documento técnico revisado por pares","Por iniciar"],["Sprint 5 · Cierre","Entregar y exponer","4.3, 5.1 a 5.3","Lista de verificación completa; exposición el 20–21 de noviembre; entrega el 28 de noviembre antes de las 8:00","Por iniciar"]]},"interesados":{"cols":["ID","Nombre / rol","Tipo","Expectativa principal","Poder (1-5)","Interés (1-5)","Cuadrante"],"rows":[["STK-01","Docentes (Ing. Barrios e Inga. Alegre)","Interno","Entregables completos, correctos y a tiempo; declaración de IA y formato IEEE","5","5","Gestionar atentamente"],["STK-02","Equipo del Grupo 4","Interno","Aprobar ambos cursos con la carga repartida","4","5","Gestionar atentamente"],["STK-03","Gestor de plataforma (Grupo 8)","Externo","Cumplimiento de seguridad, normas y control de acceso","5","4","Gestionar atentamente"],["STK-04","Ministerio de Salud, INE y Estado (Grupo 2)","Externo","Datos confiables y comparables para políticas públicas","5","4","Gestionar atentamente"],["STK-05","Hospitales y red pública (Grupos 1 y 2)","Externo","Continuidad de atención con datos de estudios","4","4","Gestionar atentamente"],["STK-06","Seguro social (Grupo 3)","Externo","Resultados de diagnóstico de sus afiliados","3","4","Mantener informado"],["STK-07","Centros de diagnóstico (usuarios del Grupo 4)","Externo","Registrar estudios rápido y sin errores","3","5","Mantener informado"],["STK-08","Organismos no lucrativos (usuarios del Grupo 4)","Externo","Medir personas atendidas y costo por persona en campañas","3","5","Mantener informado"],["STK-09","Aseguradoras (Grupo 5)","Externo","Datos agregados para análisis","3","3","Monitorear"],["STK-10","Organismos internacionales (Grupo 6)","Externo","Indicadores agregados","3","3","Monitorear"],["STK-11","Universidades e investigación (Grupo 7)","Externo","Datos anonimizados para estudios","2","3","Monitorear"],["STK-12","Pacientes","Externo","Privacidad de sus datos de salud","2","2","Monitorear"]]},"estrategia":{"cols":["Interesado","Expectativa","Cuadrante","Estrategia"],"rows":[["Docentes (Ing. Barrios e Inga. Alegre)","Entregables completos, correctos y a tiempo; declaración de IA y formato IEEE","Gestionar atentamente","Reportes de estado y entregas por Classroom; consultar dudas de alcance antes de decidir"],["Equipo del Grupo 4","Aprobar ambos cursos con la carga repartida","Gestionar atentamente","Reunión semanal de 15 min y registro de horas"],["Gestor de plataforma (Grupo 8)","Cumplimiento de seguridad, normas y control de acceso","Gestionar atentamente","Acordar formatos de datos y requisitos de seguridad; reunión quincenal"],["Ministerio de Salud, INE y Estado (Grupo 2)","Datos confiables y comparables para políticas públicas","Gestionar atentamente","Mostrar el modelo estrella y la reconciliación fuente–DW"],["Hospitales y red pública (Grupos 1 y 2)","Continuidad de atención con datos de estudios","Gestionar atentamente","Entregar esquema y plantillas de carga"],["Seguro social (Grupo 3)","Resultados de diagnóstico de sus afiliados","Mantener informado","Informar avances y el diseño final"],["Centros de diagnóstico (usuarios del Grupo 4)","Registrar estudios rápido y sin errores","Mantener informado","Plantilla CSV, mensajes de error por fila y capacitación breve"],["Organismos no lucrativos (usuarios del Grupo 4)","Medir personas atendidas y costo por persona en campañas","Mantener informado","Informar avances; mostrar el panel y la consulta de campañas"],["Aseguradoras (Grupo 5)","Datos agregados para análisis","Monitorear","Monitorear; compartir solo consultas agregadas"],["Organismos internacionales (Grupo 6)","Indicadores agregados","Monitorear","Monitorear; compartir solo consultas agregadas"],["Universidades e investigación (Grupo 7)","Datos anonimizados para estudios","Monitorear","Monitorear; el DW no contiene datos personales"],["Pacientes","Privacidad de sus datos de salud","Monitorear","Monitorear: no se contactan; se protegen (sin datos personales en el DW)"]]},"comunicaciones":{"cols":["Interesado (a quién)","Expectativa (por qué)","Información (qué)","Frecuencia (cuándo)","Medio (cómo)","Responsable (quién)","Formato (plantilla)"],"rows":[["Docentes","Entregables correctos y a tiempo","Entregables, reporte de estado, dudas de alcance","Según calendario; reporte cada 2 semanas","Classroom (entrega y comentario privado); correo institucional","Líder","Documento IEEE con apéndice de uso de IA; reporte de estado (plantilla S13)"],["Equipo del Grupo 4","Carga repartida y bloqueos resueltos","Avance, horas reales, riesgos, decisiones","Semanal (15 min); bloqueos el mismo día","Reunión breve y chat del grupo","Líder","Reporte de estado y registro de horas"],["Gestor de plataforma (Grupo 8)","Seguridad y normas cumplidas","Formato de datos, control de acceso, bitácora","Quincenal","Reunión de coordinación entre grupos","Responsable de datos","Contrato de datos (columnas, tipos, catálogos)"],["Grupos 1, 2 y 3 (fuentes y hospitales)","Cargar datos sin errores","Plantilla CSV y reglas de validación","Una vez y al cambiar el formato","Chat entre grupos y Classroom","Responsable de datos","Plantilla CSV (descargable en la aplicación)"],["Centros y organismos (usuarios)","Registrar rápido y sin errores","Uso de la aplicación, errores de carga por fila","Al entregar y cuando cambie","Aplicación (mensajes en pantalla) y sesión breve","Responsable de aplicación","Guía de una página y plantilla CSV"],["Grupos 5, 6 y 7 (consumidores)","Datos agregados y anónimos","Resultados de consultas analíticas","Al cierre","Documento técnico y consultas del DW","Responsable de datos","Tablas agregadas sin datos personales"],["Ministerio, INE y Estado (Grupo 2)","Indicadores confiables","Modelo estrella y reconciliación fuente–DW","Al cierre","Exposición final","Líder","Presentación y documento técnico"]]},"reporte":{"cols":["Campo","Contenido"],"rows":[["Proyecto","SISG – Módulo Grupo 4"],["Período","Hasta el 24 de octubre de 2026"],["Para","Docentes de Administración de Proyectos y Bases de Datos II"],["Elabora","Equipo del Grupo 4"],["CPI","*Pendiente: falta registrar el costo real (AC) en horas*"],["SPI","**1.27** (EV 110.1 h / PV 86.6 h) – valor sujeto a validar los % de avance"],["EAC","*Pendiente: requiere CPI* (BAC = 168 h)"],["Avance","**66%** (EV/BAC)"]]},"rbs":{"cols":["Categoría","Riesgos","Observación"],"rows":[["Técnico","R3, R7, R9, R10, R12, R14","Ver la TABLA III."],["Costo","—","Sin riesgo propio: no hay gasto monetario (Q 0); el costo en horas se cubre con las reservas."],["Cronograma","R2","Ver la TABLA III."],["Cliente","R4","Ver la TABLA III."],["Contractual","R6, R8, R11","Ver la TABLA III."],["Clima","—","Sin riesgo propio: trabajo remoto en equipos propios; la falla de equipo se trata en R9."],["Financiero","—","No aplica: el proyecto no tiene presupuesto monetario."],["Político","—","No identificado a nivel del prototipo académico; se revisa si cambia el alcance con otros grupos."],["Ambiental","—","No aplica a un sistema de software de uso académico."],["Personas","R5, R13","Ver la TABLA III."]]},"riesgos":{"cols":["Id","Categoría","Riesgo","Prob.","Impacto","Nivel","Porque","Estrategia y respuesta","Resp.","Reserva (h)"],"rows":[["R2","Cronograma","La cadena de Bases de Datos II tiene 2 días de holgura y coincide con el examen final","Alta","Alto","**Crítico**","holgura de 2 días y ≈ 74% de probabilidad de cumplir; cualquier atraso la agota","Mitigar: Adelantar el ETL con datos reales y mantener el solape de la revisión con la redacción","Líder","6"],["R3","Técnico","Datos de salud sensibles (nombres, DPI) en el almacén de datos o en las entregas","Baja","Alto","**Medio**","el almacén solo recibe datos sintéticos y no tiene columnas con nombre, DPI ni teléfono; si ocurriera, el daño sería alto","Evitar: El DW no guarda datos personales; solo datos sintéticos en las entregas","Calidad","0"],["R4","Cliente","Otros grupos no definen sus formatos de datos a tiempo","Alta","Medio","**Alto**","la integración depende de cuatro grupos y no hay un formato común acordado (supuesto por confirmar)","Mitigar: Publicar un contrato de datos propio (plantilla CSV y catálogos) y dejar la integración real como exclusión","Datos","2"],["R5","Personas","Sobrecarga de un integrante (equipo de 3 personas)","Media","Alto","**Alto**","la ruta crítica no tiene reemplazos y coincide con el examen final","Mitigar: Reparto de roles y revisión semanal de horas reales","Líder","4"],["R6","Contractual","Crecimiento del alcance hacia funciones de la aplicación que no se evalúan","Media","Medio","**Medio**","ya ocurrió: el 24 de octubre se agregaron MFA, roles y auditoría; se registró como cambio de alcance (paquete 3.4)","Evitar: Control de cambios: el cambio de alcance se aprueba por el líder y se registra","Líder","0"],["R7","Técnico","La aplicación (Postgres) y el DW (MySQL) no se conectan","Baja","Medio","**Bajo**","el puente existe y la reconciliación da 0; se verificó el 24 de octubre que el cambio de esquema de la aplicación no afecta las columnas que lee","Mitigar: Mitigado: `dw/run_app.sh` carga la app al DW con reconciliación en 0; repetirlo tras cada cambio de esquema","Datos","0"],["R8","Contractual","Omitir la declaración de uso de IA o el formato IEEE: nota máxima del 60% si el uso de IA no se declara","Media","Alto","**Alto**","el estándar del curso fija el tope y el campo de nivel de modificación aún está vacío","Mitigar: Apéndice de declaración preparado y lista de verificación obligatoria antes de cada entrega","Calidad","1"],["R9","Técnico","Falla del equipo o de Docker durante la demostración","Baja","Alto","**Medio**","el prototipo corre en un solo equipo con Docker","Mitigar: Capturas, video y copia de los scripts","Calidad","1"],["R10","Técnico","Los datos sintéticos no reflejan casos reales","Media","Bajo","**Bajo**","los datos se generan con distribuciones simples","Aceptar: Declararlo como límite en la sustentación","Datos","0"],["R11","Contractual","No se leyeron los lineamientos de los entregables 2 y 3 del curso","Media","Medio","**Medio**","las tareas de Classroom no muestran descripción","Mitigar: Leer las instrucciones de las tareas y ajustar los documentos antes de entregar","Líder","1"],["R12","Técnico","Fuga de datos de salud de la aplicación (acceso o descarga masiva con credenciales robadas)","Media","Alto","**Alto**","el sistema guardará datos de salud y en junio de 2026 se reportó una posible exfiltración en el sector (caso de clase); los controles aplicados bajan la probabilidad pero quedan límites (sin HTTPS, sesión en el navegador)","Mitigar: Aplicado el 24 oct.: MFA obligatorio, roles, bloqueo por intentos, auditoría con exportaciones, bases solo locales y secretos fuertes. Pendiente antes de publicar: HTTPS y cookie HttpOnly","Calidad","2"],["R13","Personas","Suplantación (phishing o deepfake) para ordenar la exportación de la base de pacientes","Baja","Alto","**Medio**","caso de clase (un «viceministro» falso en videollamada); hoy cualquier usuario con acceso de lectura puede exportar, aunque cada exportación queda auditada","Mitigar: Procedimiento: colgar y llamar al número oficial antes de exportar; exportaciones auditadas; revisión semanal de la auditoría","Calidad","1"],["R14","Técnico","Equipos del grupo con sistemas sin parche (vulnerabilidades conocidas)","Baja","Medio","**Bajo**","el equipo inventariado en el laboratorio A1-b está fuera del rango de CVE-2025-43300 y ya trae la corrección de CVE-2026-65395; faltan los otros dos integrantes","Mitigar: Mantener las actualizaciones al día y revisar el inventario cada mes","Líder","1"]]},"nist":{"cols":["Id","Fuente de amenaza","Evento de amenaza","Vulnerabilidad","Condición predisponente","Probabilidad (horizonte)","Impacto adverso"],"rows":[["R12","Atacante externo o usuario con credenciales robadas","Acceso o descarga masiva de datos de pacientes","Contraseñas débiles o reutilizadas, bases accesibles en la red y falta de trazabilidad (corregidas el 24 oct.); sin HTTPS ni cookie HttpOnly (pendiente)","Datos de salud de alto valor en entidades pequeñas sin equipo de seguridad","Media (6 meses desde la publicación; no aplica a la entrega académica)","Alto: daño a las personas por pérdida de confidencialidad y daño legal y de reputación a la entidad"],["R13","Adversario con IA generativa","Videollamada con un «viceministro» falso que ordena exportar la base a un correo externo","No existe un procedimiento escrito para verificar órdenes de exportación","Cualquier usuario autenticado con acceso de lectura puede exportar","Baja (6 meses)","Alto: salida masiva de datos de pacientes"],["R14","Error humano o explotación de un equipo sin parche","Ejecución de código al abrir una imagen manipulada (CVE-2025-43300, ImageIO)","Versión menor a la corregida: macOS Ventura < 13.7.8, Sonoma < 14.7.8, Sequoia < 15.6.1","Equipos personales sin administración central","Baja (6 meses; el equipo registrado ya está fuera del rango)","Medio: compromiso de un equipo del grupo"]]},"contingencia":{"cols":["Riesgo","Disparador","Método alternativo","Responsable"],"rows":[["R2","A 7 días del plazo, la cadena de Bases de Datos II pierde toda su holgura","Entregar el alcance mínimo (ER, modelo estrella, ETL y 8 consultas) y diferir los extras","Líder"],["R5","Un integrante no puede continuar","Reasignar paquetes con la autoridad del líder y usar la reserva de gestión","Líder"],["R9","Falla Docker o el equipo durante la demostración","Video y capturas preparados; copia de los scripts en otro equipo","Calidad"],["R12","El sistema cae o se sospecha una fuga","Registrar los casos en la plantilla CSV (formulario sin conexión) y cargarlos después con «Importar CSV»; restablecer contraseñas y MFA de los usuarios afectados; revisar la auditoría","Calidad"]]},"inventario":{"cols":["Integrante","Sistema y versión","Compilación","Estado frente a la vulnerabilidad base","Decisión","Parte B (CVE vigente de su versión)"],"rows":[["1","macOS 27.0.1","26A434","Fuera del rango afectado de CVE-2025-43300 (riesgo residual bajo)","Control aplicado: mantener las actualizaciones al día","**CVE-2026-65395** (ImageIO, escritura fuera de límites, CWE-787): una imagen manipulada puede corromper la memoria. CVSS 3.1 de 6.5 (media; AV:N, UI:R); sin explotación conocida (SSVC: ninguna; no está en el catálogo KEV). Afectaba a macOS < 15.8 y < 26.7; corregida en macOS Golden Gate 27 (fuentes: aviso de Apple y NVD, consultados el 24 de octubre). **Control aplicado:** el equipo está en 27.0.1"],["2","*Por completar*","*Por completar*","*Por completar*","*Por completar*","*Por completar*"],["3","*Por completar*","*Por completar*","*Por completar*","*Por completar*","*Por completar*"]]},"oportunidades":{"cols":["Id","Oportunidad","Estrategia","Respuesta"],"rows":[["O1","Otros grupos podrían adoptar el contrato de datos y la plantilla CSV","Compartir","Publicar la plantilla y el esquema fuente a los grupos 1–3"],["O2","Las pruebas e2e y la reconciliación automática acortan la verificación final","Mejorar","Ejecutarlas antes de cada entrega y registrar el resultado"]]},"calidad":{"cols":["Qué (atributo)","Unidad","Cómo se mide","Mínimo","Meta","Estado"],"rows":[["Fiabilidad del ETL (la fuente y el DW cuadran)","Diferencia absoluta en filas y en montos","`dw/sql/07_reconciliacion.sql` después de cada carga","0","0","**Cumple (24 oct.)**: diferencia 0"],["Adecuación funcional de la aplicación","% de pruebas e2e en verde","`npm run test:e2e`","100%","100%","**Cumple (24 oct.)**: 49 de 49"],["Seguridad: confidencialidad de datos personales","Columnas con nombre, DPI o teléfono en el DW","Revisión del diccionario de dimensiones","0","0","**Cumple**: 0 columnas"],["Seguridad: autenticación","% de cuentas que necesitan un segundo factor (MFA) para obtener sesión","Pruebas e2e de MFA (token parcial sin acceso, código de un solo uso, bloqueo)","100%","100%","**Cumple (24 oct.)**"],["Seguridad: trazabilidad","% de cambios, inicios de sesión y exportaciones desde la interfaz que quedan en la auditoría, con su autor","Pruebas e2e de bitácora y exportación","100%","100%","**Cumple (24 oct.)**; límite: la exportación se registra desde el cliente"],["Seguridad: aislamiento entre entidades","Intentos de acceso cruzado que se rechazan","Pruebas e2e de aislamiento (404/403)","100%","100%","**Cumple**"],["Usabilidad (calidad percibida)","% de personas que registran un paciente sin ayuda","Sesión con 3 a 5 personas y casos de práctica","80%","95%","*Pendiente de medir*"],["Eficiencia de desempeño","Segundos de una consulta analítica con ≈ 12,000 estudios","Tiempo de ejecución y `EXPLAIN` (consultas 1 y 8)","menos de 2 s","menos de 0.5 s","**Cumple (13 nov.)**: consulta 1 ≈ 11.1 ms y consulta 8 ≈ 1.6 ms, unas 7 veces más rápida (promedio de 50 ejecuciones, datos sintéticos)"]]},"dominios":{"cols":["Dominio","Pregunta de calidad","Aplicación en SISG"],"rows":[["Gobernanza","¿Se auditan los procesos y se mejora continuamente?","Auditoría en la aplicación (quién hizo qué y cuándo) y revisión semanal del grupo"],["Alcance","¿Cada requisito tiene criterio de aceptación y cómo se valida?","Criterios de aceptación por entregable (`01_acta_y_alcance.md`, B.3)"],["Cronograma","¿La prevención y las pruebas están dentro de cada entregable?","Pruebas e2e y reconciliación se ejecutan antes de cada entrega (paquetes 4.1 y 4.2)"],["Finanzas","¿Se presupuestó el costo de la calidad?","Paquetes 4.1 a 4.3 suman 17 h de 168 h de presupuesto"],["Interesados","¿La percepción del usuario se traduce en requisitos medibles?","Sesión de usabilidad y especificación de \"facilidad de uso\" (TABLA VII)"],["Recursos","¿El equipo tiene capacitación y herramientas desde el inicio?","Docker y scripts reproducibles (`run.sh`, `run_app.sh`); revisión por pares"],["Riesgo","¿Qué defectos detectados tarde tendrían mayor impacto?","Un error en el ETL falsea todos los indicadores: por eso la reconciliación es obligatoria (R3, R8); y una fuga de datos tendría el mayor impacto (R12)"]]},"defectos":{"cols":["Defecto","Causa","Corrección"],"rows":[["Las consultas se ejecutaban antes del ETL","Orden de scripts en `run.sh`","El ETL corre antes; las consultas van aparte"],["La tabla de sumarización era casi tan grande como el hecho (10,106 filas)","Grano demasiado fino (incluía geografía)","Se quitó la geografía; quedó en ≈ 1,800 filas"],["Los pacientes sin municipio perdían su departamento (80 estudios en \"Desconocido\")","El mapeo guardaba solo el municipio","Se guarda el departamento aparte; bajó a 40 (los que no traen ningún lugar)"],["`docker-compose.yml` quedó vacío tras una edición","Se abrió el archivo para escribir antes de leerlo","Se restauró; se revisa que ningún archivo quede en 0 bytes"]]},"tareas_usabilidad":{"cols":["#","Tarea","Éxito si…"],"rows":[["0","Ingrese al sistema con el correo y la contraseña dados y active la verificación en dos pasos.","Llega a la pantalla de inicio."],["**1**","**Registre a la paciente Ana López, mujer, nacida el 12/03/1990, de Quetzaltenango.**","**El paciente aparece en la lista. Es la tarea que mide la meta.**"],["2","*(cuenta del centro)* Registre un estudio de ultrasonido para Ana López, hoy, con costo de Q250.","El estudio aparece asociado a Ana."],["3","*(cuenta del organismo)* Cree la campaña «Jornada de salud del corazón», área cardiovascular, en Huehuetenango, que empieza el mes próximo.","La campaña aparece en la lista."],["4","Encuentre cuántos pacientes y estudios hay registrados.","Dice las cifras correctas."]]},"declaracion_ia":{"cols":["Campo","Declaración"],"rows":[["**Herramienta utilizada**","Claude Code, con el modelo Claude Sonnet 5.5 (Anthropic)"],["**Prompt**","El asistente trabajó a partir de instrucciones del grupo en una conversación (no un único prompt). Resumen: (1) revisar y mejorar el diseño de la aplicación; (2) leer el material de Classroom de Bases de Datos II y Administración de Proyectos; (3) diseñar el almacén de datos del proyecto (ER, modelo estrella, ETL y consultas); (4) redactar los documentos de gestión con las plantillas y sesiones del curso; (5) agregar carga masiva, bitácora y diseño adaptable a la aplicación; (6) agregar a la aplicación autenticación con segundo factor (MFA), roles, gestión de usuarios, auditoría con exportaciones y validación de datos de pacientes; (7) rehacer el capítulo de riesgos y el plan híbrido con lo visto en la sesión del 24 de octubre, a partir de capturas de pantalla de las diapositivas que compartió el grupo. ⚠ *Adjunten el historial completo de la conversación si el docente pide los prompts literales.*"],["**Propósito del uso**","Generar borradores de documentos (acta, alcance, EDT, cronograma, interesados, comunicaciones, riesgos, calidad, enfoque híbrido); escribir y probar el código SQL y de la aplicación (incluidas 49 pruebas automáticas); consultar con herramientas web el NVD y el aviso de seguridad de Apple para la Parte B del laboratorio A1-b; leer las capturas de la clase y extraer los métodos (RBS, NIST SP 800-30, plan de contingencia, laboratorio A1-b); calcular la ruta crítica, el PERT y el valor ganado con un script; buscar errores y corregirlos."],["**Secciones afectadas**","`docs/gestion/01` a `04` (todas las secciones; el capítulo de riesgos de `04` se reescribió con la RBS, el modelo de NIST, el plan de contingencia y la evidencia del laboratorio A1-b; el enfoque híbrido está en `02`, sección 6); `dw/` (scripts SQL, README y diseño estrella); `backend/` (carga masiva, bitácora, MFA, roles, usuarios, auditoría y validaciones); `nuevo-diseño/` (interfaz). Los números de los documentos 02 a 04 salen de un script de cálculo (`plan.py`), no se escribieron a mano."],["**Nivel de modificación**","⚠ *Completar:* indicar el porcentaje o la descripción de lo que el grupo revisó, corrigió o reescribió manualmente. Ejemplo del estándar: \"el texto sugerido por la IA fue modificado manualmente en un X% para ajustar …\". Hasta la fecha de este borrador **el grupo no había modificado manualmente estos documentos**, y debe declarar el nivel real."]]},"cifras":{"bac":168,"contingencia_pct":13,"gestion_pct":5,"texto_reservas":"- **Reserva de contingencia** (riesgos identificados): las respuestas de la TABLA III suman **19 h**. El 10% del BAC que sugiere la sesión 10 son 16.8 h y **no alcanza**; se fija en **13% = 21.8 h** (BAC de 168 h), que cubre las 19 h con 2.8 h de margen."},"sus":["Creo que me gustaría usar este sistema con frecuencia.","Encontré el sistema innecesariamente complejo.","Pensé que el sistema era fácil de usar.","Creo que necesitaría ayuda de una persona técnica para usarlo.","Encontré que las funciones estaban bien integradas.","Pensé que había demasiada inconsistencia en el sistema.","Imagino que la mayoría de las personas aprendería a usarlo rápido.","Encontré el sistema muy incómodo de usar.","Me sentí con mucha confianza usando el sistema.","Necesité aprender muchas cosas antes de poder usarlo."],"miembros":"Javier Augusto Estrada Gordillo, Jonathan Eduardo Jolón García, Jonathan Javier Soberanis Castillo","docentes":["Ing. Rafael G. Barrios Parra","Inga. Claudia Alegre"],"curso":"Administración de Proyectos Tecnológicos (3CE0101)","justificacion":"El SISG busca que los actores del ecosistema de salud compartan datos de forma segura y consistente. El documento de la OPS [1] propone partir de una **línea base**, definir una **arquitectura objetivo** y planear **transiciones**, con la interoperabilidad y la seguridad de la información como principios. Los centros de diagnóstico y los organismos no lucrativos **alimentan y consumen** datos, pero hoy trabajan con archivos de Excel y bases aisladas. Sin un modelo común, los ministerios, aseguradoras y universidades no pueden comparar estudios ni campañas por mes, tipo o lugar. Este módulo entrega ese modelo común y demuestra, con datos de prueba, que los indicadores se calculan sin perder filas ni montos (reconciliación en cero).","proposito":"registrar pacientes, estudios diagnósticos y campañas de salud de dos tipos de actores del Sistema Integral de Salud de Guatemala, y dejar esos datos listos para el análisis en un almacén de datos con modelo estrella.","alcance_incluye":["**Aplicación web** con autenticación (JWT), registro de entidades, pacientes, estudios (centros) y campañas (organismos), y un panel con totales.","**Esquema fuente** `sisg_fuente`: 3FN, catálogos, llaves foráneas, `CHECK`, índices, triggers de validación y bitácora.","**Almacén de datos** `sisg_dw`: `fact_estudio`, `fact_campana`, dimensiones tiempo, geografía y entidad (conformadas), paciente, grupo etario, tipo de estudio y área de campaña, más una tabla de sumarización.","**ETL** en procedimientos almacenados con registro de cargas (`etl_log`) y un script de reconciliación.","**Consultas analíticas** (8, con funciones de ventana) y un análisis comparativo con `EXPLAIN`."],"alcance_excluye":["Integración real con los demás grupos y con el rol de Gestor de plataforma (Grupo 8).","Puesta en producción, HTTPS real y recuperación de contraseña.","Carga incremental del ETL (se usa recarga completa).","Tableros de BI externos (Power BI, Tableau).","Versiones móviles nativas."],"alcance_proyecto":"Documentación de gestión (acta, alcance, EDT, cronograma, interesados, comunicaciones, calidad, riesgos), desarrollo y pruebas del producto, exposición final e informe de cierre. El detalle está en `02_edt_cronograma_costos.md`.","supuestos":["el grupo dispone de Docker y de un equipo para ejecutar las bases","los datos de prueba son sintéticos","los demás grupos entregarán datos que el ETL pueda leer (Excel o MySQL, según el diagrama del Grupo 8)","las horas y los porcentajes de avance de este borrador se validarán con el grupo"],"restricciones":["plazo fijo del 28 de noviembre","equipo de 3 personas","el curso de Bases de Datos II enseña SQL Server","el grupo decidió que el almacén se implementa en MySQL (decisión definitiva del 24 de octubre)"],"autoridad":["aprobar cambios de alcance dentro del equipo y registrarlos","reasignar paquetes de trabajo","usar las reservas de contingencia y de gestión","convocar la reunión semanal","escalar a los docentes lo que excede la autoridad del equipo (por ejemplo, el motor de base de datos o el alcance de una entrega)"],"reporte_texto":{"Desempeño":"Hecho: ER de las fuentes (entregado), modelo estrella y ETL, aplicación con carga masiva, MFA, roles y auditoría, 49 pruebas e2e en verde, reconciliación fuente–DW con diferencia 0. Pendiente: presentar el diseño estrella (30 oct.), conectar el ETL con datos reales, documento técnico, informe de cierre y exposición.","Riesgos principales":"(1) El plazo de Bases de Datos II tiene solo 2 días de holgura y ≈ 74% de probabilidad de cumplirse (riesgo R2). (2) Fuga de datos de salud de la aplicación (R12): controles aplicados, pendientes HTTPS y cookie HttpOnly antes de publicar. (3) Omitir la declaración de uso de IA limita la nota al 60% (R8).","Acciones y decisiones":"Decisión tomada: el almacén es MySQL (definitivo; R1 cerrado); cada integrante completa su fila del laboratorio A1-b; registrar horas reales para calcular el CPI; adelantar el ETL con datos reales; usar el apéndice de IA en cada entrega."},"hibrido_texto":["Marco **predictivo** (Fase 0 y hitos fin-a-inicio en la ruta crítica) con ejecución **ágil** por sprints, cada uno con su *Sprint Goal*, su incremento y su *Definition of Done* (Scrum Guide 2020 y sesión del 24 de octubre).","La regla del roadmap de la sesión se adapta así: **el modelo de datos verificado va antes que las consultas, y cada sprint construye sobre lo que el anterior dejó verificado**.","Entre sprints hay un hito: si uno se atrasa, se mueve la fecha de los primeros pasos del siguiente (no se solapan sin verificación). El *Product Backlog* son las historias de usuario de `01_acta_y_alcance.md` (Parte B)."],"edt_nivel1":["1 Gestión del proyecto","2 Datos – Bases de Datos II","3 Aplicación web","4 Calidad y pruebas","5 Cierre"],"reglas_com":["Los datos de pacientes **no** se envían por chat ni correo; solo datos sintéticos o anonimizados.","Un problema bloqueante se avisa el mismo día, sin esperar la reunión semanal.","Todo documento enviado a los docentes lleva el apéndice de declaración de uso de IA (sanción por omisión: calificación máxima del 60%)."],"ciclo_riesgos":{"Preparar":"*Propósito:* proteger el plazo, la calidad de las entregas y los datos de salud que manejará la aplicación. *Alcance:* el módulo del Grupo 4 (aplicación, almacén de datos y documentos). *Horizonte:* hasta el 28 de noviembre de 2026 para los riesgos del proyecto y 6 meses para los de seguridad de la aplicación. *Escala:* cualitativa de tres niveles (matriz 3×3). *Fuentes:* material de las sesiones 10 y del 24 de octubre, el estándar del curso, la OPS [1] y la experiencia del grupo. *Supuesto:* las valoraciones son iniciales y las valida el grupo.","Conducir":"Cada riesgo se identifica con lluvia de ideas y con la lista de categorías de la RBS (TABLA II), y se evalúa con probabilidad, impacto y **el porqué** de cada valor («alto porque…»), para que otra persona llegue al mismo resultado (buena práctica de NIST). Los riesgos de seguridad se describen con el modelo de NIST: fuente de amenaza → evento → vulnerabilidad → impacto adverso, con su condición predisponente (TABLA IV). Se recuerda que **severidad no es riesgo**: una vulnerabilidad de puntaje 10.0 puede dejar un riesgo residual bajo si el equipo ya está corregido.","Comunicar":"Un riesgo de nivel alto o crítico se informa al docente correspondiente en la misma semana y en el reporte de estado.","Mantener":"La matriz se revisa cada semana y al cerrar cada sprint; el riesgo cambia con la fase: más incertidumbre al iniciar, menos al implementar y, al cierre, se registra lo ocurrido en las lecciones aprendidas."},"mensaje_gerente":"Mensaje de tres líneas al gerente (borrador del integrante 1; cada integrante redacta el suyo): **Riesgo:** mi equipo está fuera del rango de la vulnerabilidad crítica CVE-2025-43300, por lo que el riesgo residual es bajo. **Decisión:** mantener el equipo actualizado y revisar el inventario cada mes (control aplicado). **Costo:** sin horas adicionales a las ≈ 0.5 h mensuales de revisión. ### Oportunidades (estrategias: explotar, mejorar, compartir, aceptar, escalar) | Id | Oportunidad | Estrategia | Respuesta | |---|---|---|---| | O1 | Otros grupos podrían adoptar el contrato de datos y la plantilla CSV | Compartir | Publicar la plantilla y el esquema fuente a los grupos 1–3 | | O2 | Las pruebas e2e y la reconciliación automática acortan la verificación final | Mejorar | Ejecutarlas antes de cada entrega y registrar el resultado | ### Reservas - **Reserva de contingencia** (riesgos identificados): las respuestas de la TABLA III suman **19 h**. El 10% del BAC que sugiere la sesión 10 son 16.8 h y **no alcanza**; se fija en **13% = 21.8 h** (BAC de 168 h), que cubre las 19 h con 2.8 h de margen. - **Reserva de gestión** (imprevistos no identificados, bajo control del líder): 8.4 h = 5% del BAC. - Se reajusta la reserva de contingencia cuando cambia la priorización de riesgos (buena práctica de la sesión 10). Seguimiento: revisar la matriz cada semana; un riesgo de nivel alto o crítico se informa al docente correspondiente en la misma semana. ## 2. Plan de gestión de la calidad integrado (método de la sesión 11) La calidad se define **contra requisitos documentados** (no contra opinión) y se trata como **principio** de PMBOK 8 en los siete dominios, con las prácticas de planificar (ISO 21502 7.11.2), asegurar (7.11.3) y controlar (7.11.4) la calidad [3]. El producto se evalúa con cinco características de ISO/IEC 25010:2023 [4]: adecuación funcional, fiabilidad, seguridad, usabilidad y eficiencia de desempeño. ### 2.1 Especificaciones de calidad medibles (qué, unidad, cómo, mínimo, meta) **TABLA VII: ESPECIFICACIÓN DE CALIDAD** | Qué (atributo) | Unidad | Cómo se mide | Mínimo | Meta | Estado | |---|---|---|---|---|---| | Fiabilidad del ETL (la fuente y el DW cuadran) | Diferencia absoluta en filas y en montos | `dw/sql/07_reconciliacion.sql` después de cada carga | 0 | 0 | **Cumple (24 oct.)**: diferencia 0 | | Adecuación funcional de la aplicación | % de pruebas e2e en verde | `npm run test:e2e` | 100% | 100% | **Cumple (24 oct.)**: 49 de 49 | | Seguridad: confidencialidad de datos personales | Columnas con nombre, DPI o teléfono en el DW | Revisión del diccionario de dimensiones | 0 | 0 | **Cumple**: 0 columnas | | Seguridad: autenticación | % de cuentas que necesitan un segundo factor (MFA) para obtener sesión | Pruebas e2e de MFA (token parcial sin acceso, código de un solo uso, bloqueo) | 100% | 100% | **Cumple (24 oct.)** | | Seguridad: trazabilidad | % de cambios, inicios de sesión y exportaciones desde la interfaz que quedan en la auditoría, con su autor | Pruebas e2e de bitácora y exportación | 100% | 100% | **Cumple (24 oct.)**; límite: la exportación se registra desde el cliente | | Seguridad: aislamiento entre entidades | Intentos de acceso cruzado que se rechazan | Pruebas e2e de aislamiento (404/403) | 100% | 100% | **Cumple** | | Usabilidad (calidad percibida) | % de personas que registran un paciente sin ayuda | Sesión con 3 a 5 personas y casos de práctica | 80% | 95% | *Pendiente de medir* | | Eficiencia de desempeño | Segundos de una consulta analítica con ≈ 12,000 estudios | Tiempo de ejecución y `EXPLAIN` (consultas 1 y 8) | menos de 2 s | menos de 0.5 s | **Cumple (13 nov.)**: consulta 1 ≈ 11.1 ms y consulta 8 ≈ 1.6 ms, unas 7 veces más rápida (promedio de 50 ejecuciones, datos sintéticos) | Los mínimos y metas de usabilidad y desempeño son propuestas del grupo (ilustrativas); deben validarse antes de usarse como criterio de aceptación. ### 2.2 Integración de la calidad en los siete dominios de PMBOK 8 **TABLA VIII: CALIDAD EN LOS DOMINIOS** | Dominio | Pregunta de calidad | Aplicación en SISG | |---|---|---| | Gobernanza | ¿Se auditan los procesos y se mejora continuamente? | Auditoría en la aplicación (quién hizo qué y cuándo) y revisión semanal del grupo | | Alcance | ¿Cada requisito tiene criterio de aceptación y cómo se valida? | Criterios de aceptación por entregable (`01_acta_y_alcance.md`, B.3) | | Cronograma | ¿La prevención y las pruebas están dentro de cada entregable? | Pruebas e2e y reconciliación se ejecutan antes de cada entrega (paquetes 4.1 y 4.2) | | Finanzas | ¿Se presupuestó el costo de la calidad? | Paquetes 4.1 a 4.3 suman 17 h de 168 h de presupuesto | | Interesados | ¿La percepción del usuario se traduce en requisitos medibles? | Sesión de usabilidad y especificación de \"facilidad de uso\" (TABLA VII) | | Recursos | ¿El equipo tiene capacitación y herramientas desde el inicio? | Docker y scripts reproducibles (`run.sh`, `run_app.sh`); revisión por pares | | Riesgo | ¿Qué defectos detectados tarde tendrían mayor impacto? | Un error en el ETL falsea todos los indicadores: por eso la reconciliación es obligatoria (R3, R8); y una fuga de datos tendría el mayor impacto (R12) | ### 2.3 Actividades de aseguramiento y control 1. **Planificar (7.11.2):** especificaciones de la TABLA VII y criterios por entregable. 2. **Asegurar (7.11.3):** revisión por pares con lista de verificación (alcance, formato IEEE, apéndice de IA) y ejecución completa desde cero antes de entregar. 3. **Controlar (7.11.4):** pruebas e2e, reconciliación fuente–DW, registro de defectos y su corrección. ### 2.4 Defectos encontrados y corregidos durante el desarrollo **TABLA IX: REGISTRO DE DEFECTOS** | Defecto | Causa | Corrección | |---|---|---| | Las consultas se ejecutaban antes del ETL | Orden de scripts en `run.sh` | El ETL corre antes; las consultas van aparte | | La tabla de sumarización era casi tan grande como el hecho (10,106 filas) | Grano demasiado fino (incluía geografía) | Se quitó la geografía; quedó en ≈ 1,800 filas | | Los pacientes sin municipio perdían su departamento (80 estudios en \"Desconocido\") | El mapeo guardaba solo el municipio | Se guarda el departamento aparte; bajó a 40 (los que no traen ningún lugar) | | `docker-compose.yml` quedó vacío tras una edición | Se abrió el archivo para escribir antes de leerlo | Se restauró; se revisa que ningún archivo quede en 0 bytes | ## Referencias [1] Organización Panamericana de la Salud, *Bases para la construcción del Marco de Arquitectura de Salud Pública para Guatemala: Línea de base*, OPS/OMS Guatemala, 2024. [2] Project Management Institute, *Guía de los Fundamentos para la Dirección de Proyectos (Guía del PMBOK)*, 8.ª ed., 2025. [3] ISO, *ISO 21502:2020 – Project, programme and portfolio management – Guidance on project management*, 2020. [4] ISO/IEC, *ISO/IEC 25010:2023 – Systems and software quality models*, 2023. [5] Joint Task Force, *NIST SP 800-30 Rev. 1: Guide for Conducting Risk Assessments*, National Institute of Standards and Technology, 2012. [6] A. Watt, *Project Management*, cap. 16, BCcampus, 2.ª ed., 2014. [7] NIST, *National Vulnerability Database (NVD)*, https://nvd.nist.gov, consultado el 24 de octubre de 2026. [8] Apple, *About the security content of macOS Golden Gate 27*, 14 de septiembre de 2026 (entradas actualizadas el 19 de octubre), https://support.apple.com/en-us/149035.","estado_objetivos":{"cols":["#","Objetivo (específico, medible, con fecha)","Estado"],"rows":[["O1","ER de las fuentes en 3FN con llaves, restricciones e índices, entregado el 25 oct.","Cumplido (paquete 2.1 al 100 %)"],["O2","Modelo estrella de 2 hechos y 3 dimensiones conformadas, sin datos personales, presentado el 30 oct.","Diseño completo y documentado (DISENO_ESTRELLA.md)"],["O3","ETL con datos reales de la app y reconciliación con diferencia 0 antes del 5 nov.","Cumplido: puente app → almacén y reconciliación en 0"],["O4","Al menos 8 preguntas de análisis con consultas antes del 10 nov.","Cumplido: 8 consultas con sus vistas"],["O5","Documentos de gestión completos y validados con el grupo al 2 nov.","Redactados; la validación del grupo sigue pendiente"],["O6","Exponer el 20–21 nov. y entregar BD II antes del 28 nov., 8:00","En curso"]]},"estado_criterios":{"cols":["#","Criterio","Resultado"],"rows":[["1","La reconciliación fuente–DW da diferencia 0 en filas y montos después de cada carga","Cumple: 0 en estudios, campañas y resumen (verificado en noviembre)"],["2","Las pruebas e2e de la aplicación pasan al 100 %","Cumple: eran 49 al 24 oct.; hoy son 103"],["3","El almacén contiene 0 columnas con nombre, DPI o teléfono","Cumple: 0 columnas"],["4","Toda entrega incluye carátula, formato IEEE y el apéndice de declaración de uso de IA","Word IEEE y apéndice listos; el nivel de modificación está por completar"],["5","El plazo de BD II se cumple con al menos 2 días de holgura","2 días de holgura y ≈ 74 % de probabilidad (24 oct.)"],["6","Al menos 80 % de las personas registran un paciente sin ayuda","Pendiente de medir (guía de la prueba lista)"]]},"estado_backlog":{"cols":["Id","Historia","Criterio de aceptación","Prio.","Estado"],"rows":[["H1","Como centro de diagnóstico, registrar un estudio de un paciente para llevar su historial","El estudio queda ligado al paciente de mi entidad; otra entidad no lo ve","Alta","Implementada"],["H2","Como organismo no lucrativo, registrar una campaña con lugar y personas atendidas","La campaña aparece en mi lista y en el panel","Alta","Implementada"],["H3","Como centro, cargar estudios desde Excel para no digitarlos","El archivo se valida y los errores se reportan por fila","Media","Implementada con CSV"],["H4","Como analista, consultar totales por mes, tipo y departamento","Los resultados coinciden con la fuente (diferencia 0)","Alta","Resuelta con el almacén"],["H5","Como administrador, ver quién modificó un estudio","La bitácora muestra usuario, fecha y cambio","Media","Implementada (sin guardar los valores)"],["H6","Como usuario móvil, usar el sistema desde el teléfono","Menú y tablas se adaptan al ancho de pantalla","Baja","Implementada (menú y encabezado)"]]},"pendientes":{"cols":["Pendiente","Quién","Cómo se cierra"],"rows":[["Asignar personas a los roles (líder, datos, aplicación y calidad)","Grupo","Completar acta (sección 9) y Word"],["Confirmar horas, % de avance, valores PERT y valoraciones de riesgo e interesados","Grupo","Reunión de validación; regenerar con plan.py"],["Registrar horas reales (AC)","Cada integrante","Calcular CPI y EAC"],["Completar el nivel de modificación de la declaración de IA","Grupo","Apéndice A (sin él, tope 60 %)"],["Ejecutar la prueba de usabilidad (3 a 5 personas)","Grupo","Llenar la fila de la especificación de calidad"],["Laboratorio A1-b: filas y Parte B de los integrantes 2 y 3; confirmar el CVE en el NVD","Cada integrante","Tabla de inventario completa"],["Verificar el catálogo de municipios (339 contra 340 oficial)","Datos","Corregir geografia.ts y 01b_catalogos.sql"],["Antes de publicar la app: HTTPS, cookie HttpOnly, migraciones, contraseña propia de MySQL, respaldos","Calidad","Cierra el riesgo R12"],["Leer lineamientos de los entregables 2 y 3; abrir el Word en Microsoft Word","Líder","Riesgo R11; revisión de formato"]]},"normas":{"cols":["Norma","Qué es","Dónde la aplicamos"],"rows":[["PMBOK 8 (PMI, 2025)","Guía de dirección de proyectos: siete dominios y principios","Marco del plan de gestión: la calidad como principio en los siete dominios y el ciclo del riesgo"],["ISO 21502:2020","Guía de gestión de proyectos","Riesgos (7.8: preparar, conducir, comunicar, mantener) y calidad (7.11.2 planificar, 7.11.3 asegurar, 7.11.4 controlar)"],["ISO/IEC 25010:2023","Modelo de calidad del software","Cinco características con metas medibles: adecuación funcional, fiabilidad, seguridad, usabilidad y eficiencia de desempeño (reconciliación en cero, consulta 8 unas 7 veces más rápida, MFA obligatorio)"],["NIST SP 800-30 Rev. 1","Evaluación de riesgos de seguridad","Riesgos de seguridad: fuente de amenaza, evento, vulnerabilidad e impacto, con el «porque» de cada valor"],["CVSS / CVE (NVD)","Severidad de vulnerabilidades conocidas","Laboratorio A1-b: CVE vigente del equipo de cada integrante; severidad no es riesgo"],["Scrum Guide 2020","Marco ágil","Sprints de la aplicación con Sprint Goal, incremento y Definition of Done"],["IEEE","Formato de documentos técnicos","Plan de gestión con carátula, tablas y figuras en IEEE, y Apéndice A de uso de IA"],["HL7 FHIR","Estándar de interoperabilidad en salud","La aplicación exporta datos en FHIR (extra técnico, fuera del plan de gestión)"],["ISO/IEC 27001","Gestión de seguridad de la información","No la aplicamos formalmente (sin certificación). Controles propios: MFA, roles por entidad y bitácora de auditoría"]]},"preguntas_metodologia":{"cols":["Pregunta","Respuesta"],"rows":[["¿Qué metodología usaron?","Híbrida: predictiva para los entregables fijos (hitos y ruta crítica) y ágil, con Scrum, para construir la aplicación por sprints."],["¿Por qué híbrida y no solo ágil?","Plazo y entregables los fija el curso (28 de noviembre); la aplicación sí evoluciona con un backlog priorizado."],["¿Qué ISO usaron?","ISO 21502 para gestión de proyectos, ISO/IEC 25010 para calidad del producto; PMBOK 8 como marco y NIST SP 800-30 para riesgos de seguridad."],["¿Por qué ISO/IEC 25010?","Define características de calidad que se pueden medir. Elegimos cinco y les pusimos meta y evidencia."],["¿Severidad y riesgo no son lo mismo?","No. CVSS mide qué tan grave es una vulnerabilidad; el riesgo depende además de la probabilidad y de lo que está expuesto. Un CVE grave en un equipo ya parchado deja un riesgo residual bajo."],["¿Cómo gestionan los cambios?","Los cambios al alcance de los entregables fijos pasan por el líder; los de la aplicación entran al backlog."],["¿Tienen certificación de seguridad?","No. Aplicamos controles propios (MFA, roles, bitácora); ISO/IEC 27001 queda como mejora futura."],["¿Por qué IEEE y declaración de IA?","El curso exige el formato IEEE y declarar el uso de IA en el Apéndice A; sin declaración, la nota máxima baja a 60%."]]},"preguntas_mas":{"cols":["Pregunta","Respuesta"],"rows":[["¿Por qué un enfoque híbrido?","Los entregables de BD II tienen contenido y fecha fijos (predictivo); la app evoluciona con un backlog (ágil)."],["¿Qué significa «holgura» y por qué importa?","Días que una actividad puede atrasarse sin atrasar el proyecto. La cadena de BD II tiene 2: un atraso mayor incumple la entrega."],["¿Por qué horas y no dinero?","No hay gasto monetario (Q 0); las horas-persona son el costo real. El método es el mismo con quetzales."],["¿Por qué reserva de 13 % y no 10 %?","Las respuestas a riesgos suman 19 h; el 10 % (16.8 h) no alcanza; 13 % = 21.8 h cubre con 2.8 h de margen."],["¿Qué significa SPI = 1.27?","Valor ganado ÷ planificado: vamos adelantados. Depende de % de avance estimados; no es resultado final."],["¿Por qué no hay CPI ni EAC?","Falta el costo real (AC): las horas realmente trabajadas. Son un pendiente del grupo."],["¿Contingencia: plan o reserva?","Son distintos: el plan es el método alternativo si el riesgo ocurre; la reserva son horas para cubrirlo."],["¿Severidad y riesgo son lo mismo?","No: una vulnerabilidad de 10.0 puede dejar riesgo bajo si el equipo ya está corregido."],["¿Hubo cambios de alcance?","Sí: el 24 oct. se agregó seguridad y usuarios (paquete 3.4, +12 h); se registró con control de cambios (R6)."],["¿Cómo declaran el uso de IA?","Apéndice A con herramienta, prompt, propósito, secciones y nivel de modificación (este último, por completar por el grupo)."],["¿Qué pasa si se atrasa el ETL (C)?","Tiene 2 días de holgura. Si se pierde, se activa el plan de contingencia: entregar alcance mínimo."]]},"referencias":["Organización Panamericana de la Salud, Bases para la construcción del Marco de Arquitectura de Salud Pública para Guatemala: Línea de base, OPS/OMS Guatemala, 2024.","Project Management Institute, Guía de los Fundamentos para la Dirección de Proyectos (Guía del PMBOK), 8.ª ed., 2025.","ISO, ISO 21502:2020 – Project, programme and portfolio management – Guidance on project management, 2020.","ISO/IEC, ISO/IEC 25010:2023 – Systems and software quality models, 2023.","Joint Task Force, NIST SP 800-30 Rev. 1: Guide for Conducting Risk Assessments, NIST, 2012.","A. Watt, Project Management, cap. 16, BCcampus, 2.ª ed., 2014.","NIST, National Vulnerability Database (NVD), https://nvd.nist.gov, consultado el 24 de octubre de 2026.","Apple, About the security content of macOS Golden Gate 27, 14 de septiembre de 2026 (entradas actualizadas el 19 de octubre), https://support.apple.com/en-us/149035."],"avance_posterior":"Avance posterior: los sprints 3 y 4 ya se cumplieron en lo técnico (reconciliación en 0, 8 consultas, 103 pruebas en verde).","backlog_nota":"H3 acepta CSV, no .xlsx (Excel permite «Guardar como CSV»). H5 no guarda los valores modificados porque son datos de salud.","contexto_html":"Contexto y justificación\nEl proyecto: SISG – Módulo del Grupo 4. Registra pacientes, estudios diagnósticos y campañas de salud de dos tipos de actores, y deja los datos listos para analizarse en un almacén con modelo estrella.\nUn solo proyecto, dos cursos: Administración de Proyectos Tecnológicos (este plan) y Bases de Datos II (ER, estrella, ETL, consultas; Inga. Claudia Alegre).\nCaso de negocioLos centros y organismos alimentan y consumen datos, pero trabajan con Excel y bases aisladas.\nSin un modelo común, ministerios, aseguradoras y universidades no pueden comparar estudios ni campañas.\nLa OPS propone partir de una línea base, una arquitectura objetivo y transiciones, con interoperabilidad y seguridad como principios.\nPropósito: entregar ese modelo común y demostrar, con datos de prueba, que los indicadores se calculan sin perder filas ni montos (reconciliación en cero).","hitos_nota":"Dato clave: el examen final de Administración de Proyectos coincide con la última semana de la entrega de Bases de Datos II. Por eso el riesgo R2 es el único crítico.","notas":{"Normas y estándares: dónde se aplica cada una en SISG":"Estas son las normas y estándares que usamos y dónde se ve cada una en el proyecto. PMBOK 8 es el marco general. ISO 21502 nos da el detalle de riesgos y calidad en la gestión. ISO/IEC 25010 define las características de calidad del producto: evaluamos cinco, con metas medibles. NIST SP 800-30 estructura los riesgos de seguridad. CVSS mide la severidad de una vulnerabilidad, y distinguimos severidad de riesgo. Scrum organiza los sprints de la aplicación e IEEE define el formato de los documentos. HL7 FHIR es un extra técnico: la aplicación exporta en ese formato. Y una aclaración honesta: no aplicamos ISO 27001 de manera formal ni tenemos certificación; los controles de seguridad son propios.","Preguntas sobre metodología y normas":"Esta diapositiva reúne las preguntas más probables sobre metodología y normas, con la respuesta corta. Si preguntan por la metodología: híbrida, con una parte predictiva y otra ágil con Scrum. Si preguntan por las ISO: 21502 para la gestión y 25010 para la calidad del producto, con PMBOK 8 como marco. Y si preguntan por seguridad, aclaramos que no tenemos certificación, sino controles propios.","Pendientes y cómo se cierran":"Cerramos con transparencia: esto es lo que falta y cómo se cierra. Falta asignar personas a los roles, que el grupo confirme las estimaciones, registrar las horas reales para calcular el costo, completar el nivel de modificación de la declaración de IA, ejecutar la prueba de usabilidad, que cada integrante complete su parte del laboratorio, verificar el catálogo de municipios, que tiene uno menos que el oficial, y los controles que se necesitan antes de publicar la aplicación de verdad. También revisar el documento en Word. Cada pendiente tiene responsable y una forma concreta de cerrarse.","Lecciones aprendidas":"Lo que funcionó: calcular cronograma, ruta crítica, PERT y valor ganado con un script, así los números de los documentos no se transcriben a mano; reconciliar la fuente contra el almacén; separar lo predictivo de lo ágil; usar las pruebas automáticas como criterio de terminado, y declarar límites y supuestos. Lo que haríamos distinto: decidir el motor de base de datos al inicio, registrar las horas reales desde el primer día porque sin ellas no hay índice de costo, usar una base propia para las pruebas desde el comienzo, congelar el alcance, porque MFA, roles y auditoría se agregaron a última hora y sumaron doce horas, y asignar personas a los roles y completar la declaración de IA a medida que se trabaja."}};
+
+</script>
+<script>
+/* Base de la presentación: utilidades, registro de diapositivas y el motor (escala 1280×720, pasos internos, índice).
+   → avanza (primero los pasos internos de la diapositiva) · ← retrocede · F pantalla completa · I índice · Home / End. */
+(function () {
+  "use strict";
+  const A = window.APT;
+  const K = (window.K = { A, slides: [] });
+  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  K.REDUCED = REDUCED;
+
+  /* ---------- utilidades ---------- */
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  K.esc = esc;
+  K.fmt = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/(^|[\s(«])\*([^*\n]+)\*/g, "$1<i>$2</i>");
+  K.$ = (s, r) => (r || document).querySelector(s);
+  K.$$ = (s, r) => [...(r || document).querySelectorAll(s)];
+  K.N = (n) => Number(n).toLocaleString("en-US");
+  K.num = (s) => { const m = String(s).replace(",", ".").match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : NaN; };
+  K.plain = (s) => String(s).replace(/\*\*|`|\*/g, "");
+  K.clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  K.store = {
+    get(k, d) { try { const v = localStorage.getItem("sisgapt:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("sisgapt:" + k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
+  };
+  K.countUp = (el, to, ms, f) => {
+    f = f || K.N; const dec = String(to).includes(".") ? 1 : 0;
+    if (REDUCED) { el.textContent = f(to); return; }
+    const t0 = performance.now();
+    (function tick(t) { const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3), v = to * e; el.textContent = f(dec ? +v.toFixed(1) : Math.round(v)); if (k < 1 && el.isConnected) requestAnimationFrame(tick); })(t0);
+  };
+
+  /* estado a partir del texto de los documentos: verde = cumplido, ámbar = en curso, rojo = pendiente */
+  K.status = (txt) => {
+    const t = String(txt).toLowerCase();
+    if (/^(cumplido|cumple|hecho|implementad|resuelta|listo)/.test(t)) return "ok";
+    if (/pendiente|por iniciar|por completar|por validar|sin dato/.test(t)) return "pend";
+    return "run";
+  };
+  K.badge = (txt, cls) => `<span class="badge ${cls || ""}">${K.fmt(txt)}</span>`;
+  K.level = (txt) => { const t = K.plain(txt).toLowerCase(); return /cr[ií]tico/.test(t) ? "crit" : /alto/.test(t) ? "alto" : /medio/.test(t) ? "medio" : "bajo"; };
+
+  /* tabla HTML a partir de {cols, rows}. opt.cols: índices a mostrar · opt.fmt(v, ci, row): celda · opt.rowCls(row, i) */
+  K.tbl = (t, opt) => {
+    opt = opt || {}; const idx = opt.cols || t.cols.map((_, i) => i);
+    const f = opt.fmt || ((v) => K.fmt(v));
+    return `<table class="dt ${opt.cls || ""}"><thead><tr>${idx.map((i) => `<th>${esc(opt.heads && opt.heads[i] != null ? opt.heads[i] : t.cols[i])}</th>`).join("")}</tr></thead><tbody>` +
+      t.rows.map((r, ri) => `<tr data-i="${ri}" class="${opt.rowCls ? opt.rowCls(r, ri) : ""}">${idx.map((i) => `<td${opt.num !== false && /^\s*[-\d.,%]+\s*$/.test(r[i]) ? ' class="n"' : ""}>${f(r[i], i, r)}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
+  };
+
+  /* ---------- registro de diapositivas ---------- */
+  K.SEC = {
+    cover: ["", ""], ini: ["Iniciación", "orange"], met: ["Metodología", "blue"], pla: ["Planificación", "purple"],
+    int: ["Interesados", "green"], rie: ["Riesgos", "pink"], cal: ["Calidad", "teal"], cie: ["Cierre", "yellow"],
+  };
+  K.add = (sec, title, text, render, o) => K.slides.push(Object.assign({ sec, title, text, render }, o || {}));
+
+  /* =====================================================================
+     MOTOR
+     ===================================================================== */
+  const D = (K.deck = {});
+  let idx = -1, ctxNow = null, build = { max: 0, i: 0, fn: null }, keys = {}, ready = false;
+  const root = () => K.$("#deck");
+
+  function makeCtx(back) {
+    const items = [];
+    return {
+      back,
+      timer(fn, ms) { const t = setInterval(fn, ms); items.push(() => clearInterval(t)); return t; },
+      timeout(fn, ms) { const t = setTimeout(fn, ms); items.push(() => clearTimeout(t)); return t; },
+      on(el, ev, fn) { el.addEventListener(ev, fn); items.push(() => el.removeEventListener(ev, fn)); },
+      onKey(k, fn) { keys[k] = fn; },
+      cleanup(fn) { items.push(fn); },
+      builds(n, fn) { build = { max: n, i: back ? n - 1 : 0, fn }; dots(); fn(build.i); },
+      dispose() { items.forEach((f) => f()); items.length = 0; keys = {}; build = { max: 0, i: 0, fn: null }; },
+    };
+  }
+  function dots() { const d = K.$(".sl-dots", root()); if (d) d.innerHTML = build.max > 1 ? Array.from({ length: build.max }, (_, k) => `<i class="${k <= build.i ? "on" : ""}"></i>`).join("") : ""; }
+  function fit() {
+    const v = K.$(".dk-view", root()), s = K.$("#dk-slide"); if (!v || !s) return;
+    s.style.transform = `translate(-50%, -50%) scale(${Math.min(v.clientWidth / 1280, v.clientHeight / 720)})`;
+  }
+  function mount(i, back) {
+    if (ctxNow) ctxNow.dispose();
+    const S = K.slides[i], host = K.$("#dk-slide"), k = K.SEC[S.sec] || K.SEC.ini;
+    host.className = "dk-slide" + (S.cover ? " is-cover" : "");
+    host.innerHTML = (S.cover ? "" : `<div class="sl-head"><span class="kick" style="--c:var(--c-${k[1]})">${String(i + 1).padStart(2, "0")} · ${k[0]}</span><h1>${esc(S.title)}</h1></div>`) + `<div class="sl-body"></div><div class="sl-dots"></div>`;
+    ctxNow = makeCtx(back);
+    S.render(K.$(".sl-body", host), ctxNow);
+    dots();
+  }
+  D.show = (n) => {
+    init(); const el = root(); el.hidden = false;
+    n = K.clamp(n, 1, K.slides.length) - 1; fit();
+    if (n !== idx) { const prev = idx; idx = n; mount(n, prev - n === 1); }
+    K.$(".dk-count", el).textContent = `${String(n + 1).padStart(2, "0")} / ${K.slides.length}`;
+    K.$(".dk-name", el).textContent = K.slides[n].title;
+    K.$(".dk-bar i", el).style.width = ((n + 1) / K.slides.length) * 100 + "%";
+    K.$$("#dk-index button", el).forEach((b, k) => b.setAttribute("aria-current", k === n ? "true" : "false"));
+    const h = `#/p/${n + 1}`; if (location.hash !== h) history.replaceState(null, "", h);
+    document.title = `${K.slides[n].title} · SISG · Administración de Proyectos`;
+  };
+  K.go = (n) => { location.hash = `#/p/${K.clamp(n, 1, K.slides.length)}`; };
+  function next() { if (build.max > 1 && build.i < build.max - 1) { build.i++; build.fn(build.i); dots(); } else if (idx < K.slides.length - 1) K.go(idx + 2); }
+  function prev() { if (build.max > 1 && build.i > 0) { build.i--; build.fn(build.i); dots(); } else if (idx > 0) K.go(idx); }
+  function toggleFull() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => {}); }
+
+  function init() {
+    if (ready) return; ready = true;
+    const el = root();
+    el.innerHTML = `<div class="dk-top"><span class="dk-count"></span><span class="dk-name"></span><span class="grow"></span>
+      <button type="button" id="dk-prev" title="Anterior (←)" aria-label="Anterior">←</button><button type="button" id="dk-next" title="Siguiente (→)" aria-label="Siguiente">→</button>
+      <button type="button" id="dk-idx" title="Índice (I)">Índice</button><button type="button" id="dk-full" title="Pantalla completa (F)">Pantalla completa</button></div>
+      <div class="dk-view"><div class="dk-slide" id="dk-slide"></div></div><div class="dk-bar"><i></i></div>
+      <aside id="dk-index" hidden><h3>Diapositivas</h3>${K.slides.map((s, i) => `<button type="button" data-i="${i}"><i>${String(i + 1).padStart(2, "0")}</i>${esc(s.title)}</button>`).join("")}</aside>`;
+    K.$("#dk-prev", el).onclick = prev; K.$("#dk-next", el).onclick = next;
+    K.$("#dk-idx", el).onclick = () => { const x = K.$("#dk-index", el); x.hidden = !x.hidden; if (!x.hidden) { const c = K.$('[aria-current="true"]', x); if (c) c.scrollIntoView({ block: "center" }); } };
+    K.$$("#dk-index button", el).forEach((b) => (b.onclick = () => { K.$("#dk-index", el).hidden = true; K.go(+b.dataset.i + 1); }));
+    K.$("#dk-full", el).onclick = toggleFull;
+    addEventListener("resize", fit); new ResizeObserver(fit).observe(K.$(".dk-view", el));
+    document.addEventListener("fullscreenchange", () => { document.body.classList.toggle("dk-full", !!document.fullscreenElement); setTimeout(fit, 60); });
+    addEventListener("keydown", (e) => {
+      if (root().hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+      if (keys[e.key]) { keys[e.key](e); return; }
+      if (e.key === "ArrowRight" || e.key === "PageDown" || (e.key === " " && e.target.tagName !== "BUTTON")) { e.preventDefault(); next(); }
+      else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
+      else if (e.key === "Home") K.go(1); else if (e.key === "End") K.go(K.slides.length);
+      else if (e.key === "f" || e.key === "F") toggleFull();
+      else if (e.key === "i" || e.key === "I") K.$("#dk-idx").click();
+      else if (e.key === "Escape" && !K.$("#dk-index").hidden) K.$("#dk-index").hidden = true;
+    });
+  }
+  K.start = () => {
+    const go = () => { const m = /^#\/p\/(\d+)$/.exec(location.hash); D.show(m ? +m[1] : 1); };
+    addEventListener("hashchange", go);
+    (document.fonts && document.fonts.load ? Promise.race([document.fonts.load('600 14px "JetBrains Mono"'), new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve()).catch(() => {}).then(go);
+  };
+})();
+
+</script>
+<script>
+/* Diapositivas 1 a 13: portada, agenda, iniciación (acta y alcance) y metodología (híbrido, Scrum, etapas, backlog). */
+(function () {
+  "use strict";
+  const K = window.K, A = K.A, esc = K.esc, fmt = K.fmt, $ = K.$, $$ = K.$$;
+  const COL = { ok: "Cumple", run: "En curso", pend: "Pendiente" };
+  const st = (txt) => { const s = K.status(txt); return `<span class="badge ${s}">${COL[s]}</span>`; };
+
+  /* ============ 1 · portada ============ */
+  K.add("cover", "SISG · Administración de Proyectos", "portada curso docente Grupo 4 plan de gestión", (b, ctx) => {
+    const steps = A.etapas.rows.map((r) => r[0].replace(/\s*\(predictiva\)/, ""));
+    b.innerHTML = `<div class="cv"><div class="cv-t"><span class="cv-k">Universidad San Pablo de Guatemala · ${esc(A.curso)}</span>
+      <h1>SISG<br><mark>Administración de Proyectos</mark></h1>
+      <p>Plan de gestión del módulo del Grupo 4: del acta de constitución al cierre, con las normas y la metodología del curso.</p>
+      <div class="cv-team">${A.miembros.split(",").map((m) => `<span>${esc(m.trim())}</span>`).join("")}</div>
+      <small>Docente: ${esc(A.docentes[0])} · Curso relacionado: Bases de Datos II (${esc(A.docentes[1])})</small>
+      <div class="cv-hint">Presiona <kbd>→</kbd> para empezar</div></div>
+      <ol class="cv-route">${steps.map((s, i) => `<li><i>${i === 0 ? "F0" : "S" + i}</i><span>${esc(s.split("·")[1] ? s.split("·")[1].trim() : s)}</span></li>`).join("")}</ol></div>`;
+    const li = $$(".cv-route li", b); let k = 0;
+    const tick = () => { li.forEach((e, j) => e.classList.toggle("on", j === k)); k = (k + 1) % li.length; };
+    tick(); ctx.timer(tick, 1400);
+  }, { cover: true });
+
+  /* ============ 2 · agenda ============ */
+  K.add("ini", "La ruta de la presentación", "agenda secciones iniciación metodología planificación interesados riesgos calidad cierre", (b, ctx) => {
+    const order = ["ini", "met", "pla", "int", "rie", "cal", "cie"];
+    const info = { ini: "Acta, objetivos SMART, alcance, supuestos e hitos", met: "Modelo híbrido: Fase 0 y sprints, Scrum, backlog", pla: "EDT, red de precedencia, ruta crítica, PERT, Gantt, costos y valor ganado",
+      int: "Registro y matriz poder/interés, comunicaciones, reporte de estado", rie: "Proceso con 4 marcos, RBS, matriz, registro, NIST, CVSS y laboratorio A1-b", cal: "ISO 21502, ISO/IEC 25010, especificaciones medibles, defectos y usabilidad",
+      cie: "Normas y estándares, lecciones, declaración de IA, pendientes y preguntas" };
+    b.innerHTML = `<div class="agenda">${order.map((s, i) => {
+      const first = K.slides.findIndex((x) => x.sec === s), n = K.slides.filter((x) => x.sec === s).length;
+      return `<button type="button" class="ag" data-go="${first + 1}" style="--c:var(--c-${K.SEC[s][1]})"><span class="ag-n">${i + 1}</span><b>${K.SEC[s][0]}</b><small>${info[s]}</small><em>${n} diapositivas · desde la ${first + 1}</em></button>`;
+    }).join("")}</div><p class="agenda-note">Sigue el orden del curso. Haz clic en una sección para ir directo.</p>`;
+    const ag = $$(".ag", b); ctx.builds(7, (i) => ag.forEach((e, k) => e.classList.toggle("on", k <= i)));
+    ag.forEach((e) => ctx.on(e, "click", () => K.go(+e.dataset.go)));
+  });
+
+  /* ============ 3 · contexto y justificación ============ */
+  K.add("ini", "Contexto y justificación", "caso de negocio OPS línea base arquitectura objetivo transiciones un proyecto dos cursos", (b, ctx) => {
+    b.innerHTML = `<div class="ctx"><section class="card c-a"><h3>El proyecto</h3><p>${fmt(A.proposito.charAt(0).toUpperCase() + A.proposito.slice(1))}</p>
+        <div class="two-c"><b>Un proyecto, dos cursos</b><span>Administración de Proyectos Tecnológicos (este plan) y Bases de Datos II: ER, estrella, ETL y consultas.</span></div></section>
+      <section class="card c-b"><h3>Caso de negocio</h3><p>${fmt(A.justificacion.split("El documento de la OPS")[0].trim())}</p>
+        <p class="hl">Los centros y organismos <b>alimentan y consumen</b> datos, pero hoy trabajan con archivos de Excel y bases aisladas. Sin un modelo común, ministerios, aseguradoras y universidades no pueden comparar estudios ni campañas.</p></section>
+      <section class="card c-c"><h3>La respuesta: el marco de la OPS</h3><div class="steps3">
+        <div class="s3"><i>1</i><b>Línea base</b><span>dónde estamos hoy</span></div><em>→</em>
+        <div class="s3"><i>2</i><b>Arquitectura objetivo</b><span>a dónde queremos llegar</span></div><em>→</em>
+        <div class="s3"><i>3</i><b>Transiciones</b><span>cómo se cruza</span></div></div>
+        <p>Con la <b>interoperabilidad</b> y la <b>seguridad de la información</b> como principios. Este módulo entrega el modelo común y demuestra que los indicadores se calculan sin perder filas ni montos (reconciliación en cero).</p></section></div>`;
+    const c = $$(".ctx > section", b); ctx.builds(3, (i) => c.forEach((e, k) => e.classList.toggle("on", k <= i)));
+  });
+
+  /* ============ 4 · objetivos SMART ============ */
+  K.add("ini", "Objetivos SMART y su estado", "objetivos específicos medibles fecha O1 O2 O3 O4 O5 O6 trazabilidad entregable", (b, ctx) => {
+    const trace = ["ER de las fuentes", "Modelo estrella", "ETL y reconciliación", "Consultas", "Documentos de gestión", "Exposición e informe de cierre"];
+    b.innerHTML = `<div class="obj">${A.estado_objetivos.rows.map((r, i) => `<article class="oc" style="--d:${i * 70}ms"><header><b>${r[0]}</b>${st(r[2])}</header><p>${fmt(r[1])}</p><footer><span>Entregable</span> ${esc(trace[i])}</footer><small>${esc(r[2])}</small></article>`).join("")}</div>
+      <p class="foot">Cada objetivo tiene medida y fecha, como pide el criterio SMART. Trazabilidad: ER → O1 · estrella → O2 · ETL y reconciliación → O3 · consultas → O4 · documentos → O5 · exposición e informe de cierre → O6.</p>`;
+    const c = $$(".oc", b); ctx.builds(c.length + 1, (i) => c.forEach((e, k) => e.classList.toggle("on", k < i || i === c.length)));
+  });
+
+  /* ============ 5 · criterios de éxito ============ */
+  K.add("ini", "Criterios de éxito", "criterios de éxito reconciliación pruebas e2e columnas personales IEEE holgura usabilidad", (b, ctx) => {
+    const rows = A.estado_criterios.rows, cnt = { ok: 0, run: 0, pend: 0 };
+    rows.forEach((r) => cnt[K.status(r[2])]++);
+    const C = 2 * Math.PI * 54;
+    b.innerHTML = `<div class="crit"><aside class="ring"><svg viewBox="0 0 130 130"><circle cx="65" cy="65" r="54" class="rg-bg"/><circle cx="65" cy="65" r="54" class="rg-fg" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
+        <div class="rg-n"><b>0</b><span>de ${rows.length} cumplen</span></div>
+        <ul><li><i class="d ok"></i>${cnt.ok} cumplen</li><li><i class="d run"></i>${cnt.run} en curso</li><li><i class="d pend"></i>${cnt.pend} pendientes</li></ul></aside>
+      <ol class="cl">${rows.map((r, i) => `<li class="${K.status(r[2])}" style="--d:${i * 90}ms"><i>${r[0]}</i><div><b>${fmt(r[1])}</b><span>${fmt(r[2])}</span></div>${st(r[2])}</li>`).join("")}</ol></div>
+      <p class="foot">Estado según la presentación vigente del grupo (algunos resultados son posteriores al corte del 24 de octubre).</p>`;
+    const fg = $(".rg-fg", b); requestAnimationFrame(() => (fg.style.strokeDashoffset = C * (1 - cnt.ok / rows.length)));
+    K.countUp($(".rg-n b", b), cnt.ok, 900);
+  });
+
+  /* ============ 6 · alcance ============ */
+  K.add("ini", "Alcance: qué incluye y qué no", "alcance del producto proyecto incluye excluye exclusiones", (b, ctx) => {
+    b.innerHTML = `<div class="alc"><section class="in"><h3>Incluye <small>alcance del producto: el qué</small></h3><ul>${A.alcance_incluye.map((x, i) => `<li style="--d:${i * 80}ms">${fmt(x)}</li>`).join("")}</ul></section>
+      <section class="out"><h3>Excluye <small>fuera del alcance</small></h3><ul>${A.alcance_excluye.map((x, i) => `<li style="--d:${i * 80}ms">${fmt(x.replace(/\.$/, ""))}</li>`).join("")}</ul></section>
+      <section class="prj"><h3>Alcance del proyecto <small>el cómo y el cuánto trabajo</small></h3><p>${fmt(A.alcance_proyecto)}</p></section></div>`;
+    const s = $$(".alc > section", b); ctx.builds(3, (i) => s.forEach((e, k) => e.classList.toggle("on", k <= i)));
+  });
+
+  /* ============ 7 · entregables y criterios de aceptación ============ */
+  K.add("ini", "Entregables y criterios de aceptación", "entregables criterios aceptación ER estrella ETL consultas aplicación documentos gestión trazabilidad", (b, ctx) => {
+    const obj = { "ER de las fuentes": "O1", "Modelo estrella": "O2", ETL: "O3", Consultas: "O4", "Aplicación": "—", "Documentos de gestión": "O5" };
+    b.innerHTML = `<div class="ent">${A.entregables.rows.map((r, i) => `<article style="--d:${i * 90}ms"><header><b>${fmt(r[0])}</b><span class="badge">${obj[K.plain(r[0])] || "—"}</span></header><p>${fmt(r[1])}</p></article>`).join("")}</div>
+      <p class="foot">Cada entregable tiene su criterio de aceptación y se rastrea a un objetivo (columna de la derecha de cada tarjeta). La aplicación no tiene objetivo propio: es la fuente de datos del resto.</p>`;
+    const c = $$(".ent article", b); ctx.builds(c.length, (i) => c.forEach((e, k) => e.classList.toggle("on", k <= i)));
+  });
+
+  /* ============ 8 · supuestos, restricciones, roles ============ */
+  K.add("ini", "Supuestos, restricciones, autoridad y roles", "supuestos restricciones director de proyecto autoridad roles líder datos aplicación calidad", (b, ctx) => {
+    const list = (arr) => `<ul>${arr.map((x) => `<li>${fmt(x.charAt(0).toUpperCase() + x.slice(1))}</li>`).join("")}</ul>`;
+    b.innerHTML = `<div class="sup"><section class="card"><h3>Supuestos</h3>${list(A.supuestos)}</section><section class="card"><h3>Restricciones</h3>${list(A.restricciones)}</section>
+      <section class="card"><h3>Autoridad del director de proyecto</h3>${list(A.autoridad)}</section>
+      <section class="card roles"><h3>Roles</h3>${A.roles.rows.map((r) => `<div class="role"><b>${esc(r[0])}</b><span>${fmt(r[1])}</span>${K.badge("por asignar", "pend")}</div>`).join("")}
+        <small>La asignación de personas es una acción pendiente del grupo (acta, sección 9).</small></section></div>
+      <p class="foot">Equipo: ${esc(A.miembros)}.</p>`;
+    const c = $$(".sup > section", b); ctx.builds(4, (i) => c.forEach((e, k) => e.classList.toggle("on", k <= i)));
+  });
+
+  /* ============ 9 · hitos ============ */
+  K.add("ini", "Hitos y cronograma preliminar", "hitos fechas 25 octubre 30 octubre 2 noviembre 5 noviembre 10 noviembre exposición examen entrega 28 noviembre", (b, ctx) => {
+    const MES = { oct: 9, nov: 10 };
+    const parse = (s) => { const m = /(\d{1,2})(?:–(\d{1,2}))?\s+(oct|nov)/i.exec(K.plain(s)); return m ? new Date(2026, MES[m[3].toLowerCase()], +m[1]) : null; };
+    const ms = A.hitos.rows.map((r) => ({ d: parse(r[0]), f: K.plain(r[0]), t: r[1] })), t0 = ms[0].d.getTime(), t1 = ms[ms.length - 1].d.getTime();
+    const pos = (d) => 4 + ((d.getTime() - t0) / (t1 - t0)) * 92;
+    const now = new Date(), inRange = now >= ms[0].d && now <= new Date(2026, 10, 30), todayPct = inRange ? K.clamp(4 + ((Math.min(now.getTime(), t1) - t0) / (t1 - t0)) * 92, 0, 98) : null;
+    b.innerHTML = `<div class="tl"><div class="tl-line"><i></i></div>${ms.map((m, i) => `<div class="tl-m ${i % 2 ? "dn" : "up"}" style="left:${pos(m.d)}%;--d:${i * 120}ms"><span class="dot"></span><b>${esc(m.f)}</b><small>${fmt(m.t)}</small></div>`).join("")}${todayPct != null ? `<div class="tl-now" style="left:${todayPct}%"><span>hoy</span></div>` : ""}</div>
+      <div class="call warn"><b>Dato clave</b>${fmt(A.hitos_nota.replace("Dato clave: ", ""))}</div>
+      <div class="call info"><b>Fecha actualizada</b>El documento «Qué leer, qué presentar y qué entregar» fija la exposición el <strong>sábado 28 de noviembre de 2026</strong>; el acta conserva las fechas originales (20–21 de noviembre).</div>`;
+    const ml = $$(".tl-m", b); ctx.builds(ml.length + 1, (i) => { $(".tl-line i", b).style.width = Math.min(100, (i / ml.length) * 100) + "%"; ml.forEach((e, k) => e.classList.toggle("on", k < i)); });
+  });
+
+  /* ============ 10 · enfoque híbrido ============ */
+  K.add("met", "Enfoque híbrido: predictivo + ágil", "híbrido predictivo ágil fase 0 sprints ruta crítica hitos scrum guide sprint cero", (b, ctx) => {
+    const e = A.etapas.rows;
+    const adj = [["Sprint 0 → Fase 0", "«Sprint 0»: arquitectura, modelado y planificación.", "Fase 0 · Preparación (predictiva). La Scrum Guide no define un «Sprint 0»; esta fase cierra con el acta, el alcance y el cronograma de hitos aprobados."],
+      ["Ruta crítica", "Nombra el orden de trabajo de los sprints.", "Se gestiona en el marco predictivo: hitos fin-a-inicio entre sprints. Si un hito se atrasa, se mueve la fecha de los primeros pasos."],
+      ["Sprints 1–5", "Cinco etapas definidas de antemano.", "Ejecución ágil: cada sprint con Sprint Goal, Incremento y Definition of Done; Review y Retrospective para adaptar el siguiente."]];
+    b.innerHTML = `<div class="hyb"><div class="hy-bands"><span class="pred">PREDICTIVA</span><span class="agil">ÁGIL · SPRINTS CON SPRINT GOAL, INCREMENTO Y DEFINITION OF DONE</span></div>
+      <ol class="hy-route">${e.map((r, i) => `<li class="${K.status(r[4])}"><i>${i === 0 ? "F0" : "S" + i}</i><b>${esc(r[0].split("·")[1].replace(/\(predictiva\)/, "").trim())}</b><small>${fmt(r[1])}</small></li>`).join('<span class="hy-m" title="Hito entre etapas">◆</span>')}</ol>
+      <div class="hy-adj">${adj.map((x) => `<div class="adj"><b>${x[0]}</b><span class="was">${fmt(x[1])}</span><span class="now">${fmt(x[2])}</span></div>`).join("")}</div>
+      <div class="call warn gold"><b>Regla de oro del roadmap</b>${fmt(A.hibrido_texto[1].replace("La regla del roadmap de la sesión se adapta así: ", ""))}</div>
+      <p class="foot">Fuentes: Scrum Guide 2020 · Scrum.org (Sprint Zero) · PMBOK (Critical Path) · PMI (2017), Agile Practice Guide, 3.1.6–3.1.10. Contenido: roadmap del docente, ajustado al modelo híbrido.</p></div>`;
+    const parts = [$(".hy-route", b), $(".hy-adj", b), $(".gold", b)]; ctx.builds(3, (i) => parts.forEach((p, k) => p.classList.toggle("on", k <= i)));
+  });
+
+  /* ============ 11 · Scrum en SISG ============ */
+  K.add("met", "Las cuatro piezas de Scrum en SISG", "scrum product backlog sprint sprint goal incremento definition of done", (b, ctx) => {
+    const e = A.etapas.rows;
+    const cards = [["Product Backlog", "Lista emergente y ordenada de lo necesario para mejorar el producto; única fuente de trabajo del equipo.", "Las historias de usuario H1 a H6, ordenadas por prioridad (alta, media, baja)."],
+      ["Sprint", "Evento de duración fija, de un mes o menos, que contiene a todos los demás eventos de Scrum.", "Cinco sprints después de la Fase 0, cada uno con su objetivo y su cierre."],
+      ["Sprint Goal", "Objetivo único del sprint; da foco y coherencia al trabajo del equipo.", `Sprint 2 → «${e[2][1]}».`],
+      ["Incremento + Definition of Done", "Peldaño concreto y usable hacia el objetivo del producto; solo cuenta si cumple la Definition of Done.", `Sprint 1 termina cuando: ${e[1][3].replace(/\.$/, "")}.`]];
+    b.innerHTML = `<div class="scr">${cards.map((c, i) => `<article style="--d:${i * 100}ms"><h3>${c[0]}</h3><p>${c[1]}</p><div class="sisg"><span>En SISG</span>${fmt(c[2])}</div></article>`).join("")}</div>
+      <p class="foot">Fuente: Schwaber & Sutherland (2020), The Scrum Guide — secciones Scrum Events y Scrum Artifacts.</p>`;
+    const c = $$(".scr article", b); ctx.builds(4, (i) => c.forEach((e2, k) => e2.classList.toggle("on", k <= i)));
+  });
+
+  /* ============ 12 · etapas, sprint goal y DoD ============ */
+  K.add("met", "Etapas: Sprint Goal y Definition of Done", "fase 0 sprint 1 2 3 4 5 definition of done estado paquetes edt", (b, ctx) => {
+    const e = A.etapas;
+    b.innerHTML = `<div class="eta"><div class="eta-t">${K.tbl(e, { cols: [0, 1, 2, 4], fmt: (v, ci) => (ci === 4 ? `${st(v)}` : fmt(v)), rowCls: () => "clk", num: false })}</div>
+      <aside class="eta-d"></aside></div><div class="call ok"><b>Avance posterior al corte</b>${esc(A.avance_posterior.replace("Avance posterior: ", ""))}</div>`;
+    const d = $(".eta-d", b), rows = $$("tbody tr", b);
+    const show = (i) => { rows.forEach((r, k) => r.classList.toggle("sel", k === i)); const r = e.rows[i];
+      d.innerHTML = `<span class="tag">${i === 0 ? "Predictiva" : "Ágil"}</span><h3>${esc(r[0])}</h3><h4>Sprint Goal</h4><p>${fmt(r[1])}</p><h4>Paquetes de la EDT</h4><p><code>${esc(r[2])}</code></p><h4>Definition of Done</h4><p class="dod">${fmt(r[3])}</p><h4>Estado al 24 de octubre</h4><p>${st(r[4])} <span class="mut">${fmt(r[4])}</span></p>`; };
+    rows.forEach((r, i) => ctx.on(r, "click", () => show(i))); ctx.builds(e.rows.length, show);
+  });
+
+  /* ============ 13 · backlog ============ */
+  K.add("met", "Backlog: historias de usuario y estado", "backlog historias de usuario H1 H2 H3 H4 H5 H6 prioridad criterio de aceptación", (b, ctx) => {
+    const rows = A.estado_backlog.rows, pr = ["Alta", "Media", "Baja"];
+    b.innerHTML = `<div class="bk">${pr.map((p) => `<section><h3 class="p-${p.toLowerCase()}">Prioridad ${p}</h3>${rows.filter((r) => r[3] === p).map((r, i) => `<article class="bkc" style="--d:${i * 120}ms"><header><b>${r[0]}</b><span class="badge ${K.status(r[4])}">${fmt(r[4])}</span></header><p>${fmt(r[1])}</p><small><b>Criterio:</b> ${fmt(r[2])}</small></article>`).join("")}</section>`).join("")}</div>
+      <p class="foot">${esc(A.backlog_nota)}</p>`;
+    const c = $$(".bkc", b); ctx.builds(c.length, (i) => c.forEach((e, k) => e.classList.toggle("on", k <= i)));
+  });
+})();
+
+</script>
+<script>
+/* Diapositivas 14 a 24: planificación (EDT, PDM, PERT, Gantt, costos, valor ganado) e interesados y comunicaciones. */
+(function () {
+  "use strict";
+  const K = window.K, A = K.A, esc = K.esc, fmt = K.fmt, $ = K.$, $$ = K.$$, N = K.N;
+  const COL = { ok: "Cumple", run: "En curso", pend: "Pendiente" };
+  const st = (txt) => { const s = K.status(txt); return `<span class="badge ${s}">${COL[s]}</span>`; };
+  const BAC = K.num(A.cifras.bac);
+  const pk = A.paquetes.rows.map((r) => ({ code: r[0], name: r[1], h: K.num(r[2]), dates: r[3], pct: K.num(r[4]), resp: r[5], g: +r[0].split(".")[0] }));
+  const GC = ["blue", "purple", "green", "teal", "yellow"];
+  const phi = (z) => { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp((-z * z) / 2), p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+
+  /* ============ 14 · EDT ============ */
+  K.add("pla", "EDT: estructura de desglose del trabajo", "EDT paquetes de trabajo regla del 100% horas 168 gestión datos aplicación calidad cierre", (b, ctx) => {
+    const groups = A.edt_nivel1.map((n, i) => ({ name: n.slice(2), pk: pk.filter((p) => p.g === i + 1), c: GC[i] })).map((g) => Object.assign(g, { h: g.pk.reduce((a, p) => a + p.h, 0) }));
+    b.innerHTML = `<div class="edt"><div class="edt-root"><span>0</span><b>SISG – Módulo Grupo 4</b><em><strong data-n="${BAC}">0</strong> h</em><small>Regla del 100 %: los paquetes suman todo el alcance</small></div>
+      <div class="edt-br">${groups.map((g, i) => `<section class="edt-g" style="--c:var(--c-${g.c});--d:${i * 90}ms"><header><b>${i + 1} · ${esc(g.name)}</b><span>${g.h} h · ${Math.round((g.h / BAC) * 100)} %</span><i style="width:${(g.h / BAC) * 100}%"></i></header>
+        <div class="edt-p">${g.pk.map((p) => `<span class="pk" title="${esc(p.name)} · ${esc(p.dates)} · ${esc(p.resp)}"><i>${p.code}</i>${esc(p.name)}<b>${p.h} h</b></span>`).join("")}</div></section>`).join("")}</div></div>
+      <p class="foot">Nivel 1: cinco grupos. Nivel 2: veinte paquetes de trabajo. Las horas son estimaciones iniciales que el grupo debe reemplazar por sus horas reales.</p>`;
+    K.countUp($("[data-n]", b), BAC, 1000);
+    const g = $$(".edt-g", b); ctx.builds(g.length + 1, (i) => g.forEach((e, k) => e.classList.toggle("on", k < i || i === g.length)));
+  });
+
+  /* ============ 15 · diccionario de paquetes ============ */
+  K.add("pla", "Diccionario de paquetes de trabajo", "paquetes horas fechas avance responsable valor ganado 110.1 66% líder datos calidad", (b, ctx) => {
+    const resp = ["Todos", ...new Set(pk.map((p) => p.resp))]; let f = "Todos";
+    b.innerHTML = `<div class="dic"><div class="dic-top"><div class="chips">${resp.map((r) => `<button type="button" class="chip" aria-pressed="${r === f}" data-r="${esc(r)}">${esc(r)}</button>`).join("")}</div><div class="dic-sum"></div></div><div class="dic-t"></div></div>
+      <p class="foot">Responsables propuestos por rol (Líder, Datos, Calidad, Todos); el grupo debe asignar personas. Avance = porcentaje estimado en el borrador del 24 de octubre.</p>`;
+    const draw = () => {
+      const rows = pk.filter((p) => f === "Todos" || p.resp === f), h = rows.reduce((a, p) => a + p.h, 0), ev = rows.reduce((a, p) => a + (p.h * p.pct) / 100, 0);
+      $(".dic-sum", b).innerHTML = `<span><b>${rows.length}</b> paquetes</span><span><b>${h}</b> h</span><span>valor ganado <b>${ev.toFixed(1)}</b> h</span><span>avance ponderado <b>${h ? ((ev / h) * 100).toFixed(0) : 0} %</b></span>`;
+      $(".dic-t", b).innerHTML = `<table class="dt"><thead><tr><th>Código</th><th>Paquete</th><th>Horas</th><th>Fechas</th><th>Avance</th><th>Responsable</th></tr></thead><tbody>${rows.map((p) => `<tr><td><code>${p.code}</code></td><td>${esc(p.name)}</td><td class="n">${p.h}</td><td>${esc(p.dates)}</td><td><div class="pb"><i style="width:${p.pct}%"></i><span>${p.pct} %</span></div></td><td>${esc(p.resp)}</td></tr>`).join("")}</tbody></table>`;
+      $$(".chip", b).forEach((c) => c.setAttribute("aria-pressed", c.dataset.r === f));
+    };
+    $$(".chip", b).forEach((c) => ctx.on(c, "click", () => { f = c.dataset.r; draw(); })); draw();
+  });
+
+  /* ============ 16 · PDM ============ */
+  K.add("pla", "Red de precedencia (PDM) y holgura", "PDM método de diagramación por precedencia actividades predecesoras ES EF LS LF holgura ruta crítica", (b, ctx) => {
+    const act = {}; A.actividades.rows.forEach((r) => (act[r[0]] = { id: r[0], name: r[1], d: K.num(r[2]), pre: r[3], es: K.num(r[4]), ef: K.num(r[5]), ls: K.num(r[6]), lf: K.num(r[7]), slack: K.num(r[8]), dates: r[9] }));
+    const pos = { A: [0, 0], F: [1, 0], G: [1, 1], H: [2, 0.5], I: [3, 0.5], J: [4, 0.5], B: [0, 2.3], C: [1, 2.3], D: [2, 2.3], E: [3, 2.3], K: [4, 2.3], L: [5, 2.3] };
+    const edges = [["A", "F"], ["A", "G"], ["F", "H"], ["G", "H"], ["H", "I"], ["I", "J"], ["B", "C"], ["C", "D"], ["D", "E"], ["E", "K"], ["K", "L"]];
+    const wrap = (t) => { const w = t.split(" "); let a = "", c = ""; for (const x of w) { if (!c && (a + " " + x).trim().length <= 19) a = (a + " " + x).trim(); else c = (c + " " + x).trim(); } return [a, c.length > 24 ? c.slice(0, 23) + "…" : c]; };
+    const W = 178, H = 88, X = 192, Y = 102, ox = 8, oy = 4, P = (id) => ({ x: ox + pos[id][0] * X, y: oy + pos[id][1] * Y });
+    const sl = (n) => (n.slack === 0 ? "s0" : n.slack <= 2 ? "s2" : "s8");
+    const path = ([a, c]) => { const p = P(a), q = P(c); return `M${p.x + W} ${p.y + H / 2} C${p.x + W + 14} ${p.y + H / 2}, ${q.x - 14} ${q.y + H / 2}, ${q.x} ${q.y + H / 2}`; };
+    b.innerHTML = `<div class="pdm"><svg viewBox="0 0 1184 330" role="img" aria-label="Red de precedencia"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5 1 9z" fill="var(--ink)"/></marker></defs>
+      ${edges.map((e) => `<path class="pe" d="${path(e)}" marker-end="url(#ar)"/>`).join("")}
+      <text x="${P("E").x + W + 4}" y="${P("E").y + H + 18}" class="ov">solape −2 d</text>
+      ${Object.values(act).map((n) => { const p = P(n.id); return `<g class="pn ${sl(n)}" data-id="${n.id}" transform="translate(${p.x},${p.y})"><rect width="${W}" height="${H}" rx="10"/><text x="10" y="18" class="t1">${n.id} · ${esc(wrap(n.name)[0])}</text><text x="10" y="33" class="t1">${esc(wrap(n.name)[1])}</text><text x="10" y="55" class="t2">${n.d} d · holgura ${n.slack}</text><text x="10" y="75" class="t3">ES ${n.es}  EF ${n.ef}  LS ${n.ls}  LF ${n.lf}</text></g>`; }).join("")}</svg>
+      <div class="pdm-l"><span><i class="s0"></i>holgura 0 (fecha fija)</span><span><i class="s2"></i>holgura 2 (menor margen de la entrega de BD II)</span><span><i class="s8"></i>holgura 8 o más</span></div>
+      <aside class="pdm-d"></aside></div>`;
+    const d = $(".pdm-d", b), nodes = $$(".pn", b);
+    const show = (id) => { const n = act[id]; nodes.forEach((g) => g.classList.toggle("sel", g.dataset.id === id));
+      d.innerHTML = `<h3>${n.id} · ${esc(n.name)}</h3><p><b>Duración:</b> ${n.d} días · <b>Predecesoras:</b> ${esc(n.pre)} · <b>Fechas:</b> ${esc(n.dates)}</p><p><b>Inicio temprano</b> ${n.es} · <b>Fin temprano</b> ${n.ef} · <b>Inicio tardío</b> ${n.ls} · <b>Fin tardío</b> ${n.lf} · <b>Holgura</b> ${n.slack} d <span class="mut">(días desde el 26 de octubre)</span></p>`; };
+    nodes.forEach((g) => ctx.on(g, "click", () => show(g.dataset.id)));
+    const steps = [["BD II", ["B", "C", "D", "E", "K", "L"]], ["Gestión", ["A", "F", "G", "H", "I", "J"]]];
+    // ruta con menor holgura de BD II: se dibuja resaltada en el último paso
+    ctx.builds(3, (i) => { nodes.forEach((g) => g.classList.toggle("off", i === 0 && !steps[0][1].includes(g.dataset.id))); $$(".pe", b).forEach((p, k) => p.classList.toggle("off", i === 0 && k < 6)); $$(".pn", b).forEach((g) => g.classList.toggle("dimm", i === 2 && act[g.dataset.id].slack > 2)); show(i === 2 ? "E" : i === 1 ? "A" : "B"); });
+  });
+
+  /* ============ 17 · ruta crítica y PERT ============ */
+  K.add("pla", "Ruta crítica y estimación PERT", "ruta crítica CPM PERT tres valores optimista probable pesimista probabilidad 74% desviación z", (b, ctx) => {
+    const chain = A.pert.rows.map((r) => ({ id: r[0], name: r[1], o: K.num(r[2]), m: K.num(r[3]), p: K.num(r[4]) })), base = chain.map((c) => ({ ...c })), OV = 2, AV = 33;
+    b.innerHTML = `<div class="pert"><div class="pert-l"><h3>Cadena de Bases de Datos II <small>B → C → D → E → K → L</small></h3>${chain.map((c, i) => `<div class="pr" data-i="${i}"><span class="pid">${c.id}</span><span class="pnm">${esc(c.name)}</span>
+      ${["o", "m", "p"].map((k) => `<label>${k.toUpperCase()}<input type="range" min="1" max="16" step="1" value="${c[k]}" data-k="${k}"><b>${c[k]}</b></label>`).join("")}<em class="pe2">—</em></div>`).join("")}
+      <button type="button" class="btn" id="rs">Restablecer valores del plan</button></div>
+      <aside class="pert-r"><div class="gauge"><svg viewBox="0 0 200 120"><path class="gb" d="M20 100 A80 80 0 0 1 180 100"/><path class="gf" d="M20 100 A80 80 0 0 1 180 100" pathLength="100" stroke-dasharray="0 100"/></svg><div class="gv"><b>0 %</b><span>probabilidad de cumplir</span></div></div>
+      <dl><div><dt>Duración esperada</dt><dd class="eE">—</dd></div><div><dt>Desviación (σ)</dt><dd class="eS">—</dd></div><div><dt>Días disponibles</dt><dd>${AV}</dd></div><div><dt>z = (${AV} − E) / σ</dt><dd class="eZ">—</dd></div></dl>
+      <p class="fx"><code>E = (O + 4M + P) / 6</code> · <code>σ = (P − O) / 6</code> · se restan ${OV} días por el solape de K con E · σ total = √(Σσ²)</p>
+      <div class="call info"><b>Para subir la probabilidad</b>Empezar el ETL con datos reales ya (C), no esperar la presentación de la tarea del 30 de octubre (B), y mantener el solape de K con E.</div></aside></div>
+      <p class="foot">Los valores O/M/P son estimaciones del autor del borrador; el grupo debe validarlas. J (exposición) tiene holgura 0 porque su fecha la fija el calendario del curso.</p>`;
+    const calc = () => { let E = 0, V = 0;
+      chain.forEach((c, i) => { const e = Math.round(((c.o + 4 * c.m + c.p) / 6) * 10) / 10, s = Math.round(((c.p - c.o) / 6) * 100) / 100; E += e; V += s * s; $$(".pr", b)[i].querySelector(".pe2").textContent = `E ${e.toFixed(1)} · σ ${s.toFixed(2)}`; });
+      E -= OV; const S = Math.sqrt(V), z = (AV - E) / S, pr = phi(z) * 100;
+      $(".eE", b).textContent = E.toFixed(1) + " d"; $(".eS", b).textContent = S.toFixed(2) + " d"; $(".eZ", b).textContent = z.toFixed(2);
+      $(".gv b", b).textContent = pr.toFixed(0) + " %"; $(".gf", b).style.strokeDasharray = `${pr} 100`; $(".gf", b).style.stroke = pr >= 80 ? "var(--ok)" : pr >= 60 ? "var(--warn)" : "var(--bad)"; };
+    $$("input", b).forEach((inp) => ctx.on(inp, "input", () => { const i = +inp.closest(".pr").dataset.i; chain[i][inp.dataset.k] = +inp.value; inp.nextElementSibling.textContent = inp.value; calc(); }));
+    ctx.on($("#rs", b), "click", () => { base.forEach((c, i) => ["o", "m", "p"].forEach((k) => { chain[i][k] = c[k]; const inp = $$(".pr", b)[i].querySelector(`[data-k="${k}"]`); inp.value = c[k]; inp.nextElementSibling.textContent = c[k]; })); calc(); });
+    calc();
+  });
+
+  /* ============ 18 · Gantt ============ */
+  K.add("pla", "Cronograma (Gantt) de las actividades restantes", "gantt cronograma actividades restantes ruta crítica 26 octubre 28 noviembre", (b, ctx) => {
+    const rows = A.actividades.rows.map((r) => ({ id: r[0], name: r[1], es: K.num(r[4]), ef: K.num(r[5]), sl: K.num(r[8]) })), T = 33, crit = ["K", "L", "J"];
+    const sec = [["Bases de Datos II (cadena con menor holgura)", ["B", "C", "D", "E", "K", "L"]], ["Administración de Proyectos", ["A", "F", "G", "H", "I", "J"]]];
+    const d0 = new Date(2026, 9, 26), tick = (n) => new Date(d0.getTime() + n * 864e5), lab = (d) => `${d.getDate()} ${["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][d.getMonth()]}`;
+    const now = Math.round((new Date() - d0) / 864e5), showNow = now >= 0 && now <= T;
+    b.innerHTML = `<div class="gantt"><div class="g-ax">${[0, 7, 14, 21, 28].map((n) => `<span style="left:${(n / T) * 100}%">${lab(tick(n))}</span>`).join("")}<span style="left:100%" class="end">${lab(tick(T))}</span></div>
+      ${sec.map(([t, ids]) => `<div class="g-s"><h4>${t}</h4>${ids.map((id) => { const r = rows.find((x) => x.id === id); return `<div class="g-r"><span class="g-n"><b>${r.id}</b> ${esc(r.name)}</span><div class="g-t">${[7, 14, 21, 28].map((n) => `<i class="gl" style="left:${(n / T) * 100}%"></i>`).join("")}<div class="g-b ${crit.includes(id) ? "crit" : ""}" style="left:${(r.es / T) * 100}%;width:${((r.ef - r.es) / T) * 100}%"><span>${r.ef - r.es} d</span></div></div></div>`; }).join("")}</div>`).join("")}
+      ${showNow ? `<div class="g-now" style="left:calc(260px + (100% - 260px) * ${now / T})"><span>hoy</span></div>` : ""}</div>
+      <p class="foot">Días calendario desde el lunes 26 de octubre de 2026 (método de precedencias). En rojo, las actividades críticas: K y L cierran la entrega de BD II con 2 días de holgura; J, la exposición, tiene la fecha fija por el calendario del curso. El trabajo ya hecho está en el diccionario de paquetes.</p>`;
+    const bars = $$(".g-b", b); ctx.builds(bars.length + 1, (i) => bars.forEach((e, k) => e.classList.toggle("on", k < i || i === bars.length)));
+  });
+
+  /* ============ 19 · costos y reservas ============ */
+  K.add("pla", "Costos y reservas", "costos reservas contingencia gestión BAC 168 horas 13% 21.8 8.4 198.2 horas-persona", (b, ctx) => {
+    const need = A.riesgos.rows.reduce((a, r) => a + K.num(r[9]), 0);
+    b.innerHTML = `<div class="cost"><div class="cs-l"><div class="bac"><div class="bar"><i class="b1" style="flex:0"></i><i class="b2" style="flex:0"></i><i class="b3" style="flex:0"></i></div>
+      <ul class="lg"><li><i class="b1"></i>BAC · presupuesto base <b>${BAC} h</b></li><li><i class="b2"></i>Reserva de contingencia <b class="rc">—</b></li><li><i class="b3"></i>Reserva de gestión (5 %) <b>${(BAC * 0.05).toFixed(1)} h</b></li></ul></div>
+      <div class="total">Presupuesto con reservas <b class="tt">—</b></div>
+      <p>No hay gasto monetario: <b>Q 0</b>. Se usan Docker y software libre en equipos propios, así que el costo se mide en <b>horas-persona</b>. El método es el mismo con quetzales.</p></div>
+      <aside class="cs-r"><h3>¿Por qué 13 % y no 10 %?</h3><p>Las respuestas a los riesgos identificados suman <b>${need} h</b> (columna «Reserva» del registro). Mueve el porcentaje y mira si alcanza:</p>
+        <label class="sl">Reserva de contingencia <b class="pc">13 %</b><input type="range" min="5" max="20" step="1" value="13" id="pc"></label>
+        <div class="cov"><span>Reserva</span><b class="cv1">—</b><span>Necesario</span><b>${need} h</b><span>Margen</span><b class="mg">—</b></div><div class="verd2"></div>
+        <p class="mut">La sesión 10 sugiere 10 % del BAC. Se reajusta la reserva cuando cambia la priorización de riesgos. La reserva de gestión (imprevistos no identificados) queda bajo control del líder.</p></aside></div>`;
+    const calc = () => { const p = +$("#pc", b).value, rc = +(BAC * p / 100).toFixed(1), rg = +(BAC * 0.05).toFixed(1), tot = BAC + rc + rg, mg = +(rc - need).toFixed(1);
+      $(".pc", b).textContent = p + " %"; $(".rc", b).textContent = `${p} % = ${rc} h`; $(".tt", b).textContent = tot.toFixed(1) + " h"; $(".cv1", b).textContent = rc + " h"; $(".mg", b).textContent = (mg >= 0 ? "+" : "") + mg + " h";
+      $(".b1", b).style.flex = BAC; $(".bar .b2", b).style.flex = rc; $(".bar .b3", b).style.flex = rg;
+      const v = $(".verd2", b); v.className = "verd2 " + (mg >= 0 ? "ok" : "bad"); v.textContent = mg >= 0 ? `Cubre las ${need} h de respuestas con ${mg} h de margen.` : `No alcanza: faltan ${Math.abs(mg)} h.`; };
+    ctx.on($("#pc", b), "input", calc); requestAnimationFrame(calc);
+  });
+
+  /* ============ 20 · valor ganado ============ */
+  K.add("pla", "Valor ganado: calculadora", "valor ganado EVM EV PV SPI CPI EAC AC avance BAC", (b, ctx) => {
+    const PV0 = K.num(A.evm.rows.find((r) => r[0].startsWith("PV"))[1]), pct = pk.map((p) => p.pct);
+    b.innerHTML = `<div class="evm"><div class="ev-l">${pk.map((p, i) => `<label class="ev-r" title="${esc(p.name)}"><span><code>${p.code}</code>${esc(p.name)}</span><small>${p.h} h</small><input type="range" min="0" max="100" step="5" value="${p.pct}" data-i="${i}"><b>${p.pct} %</b></label>`).join("")}</div>
+      <aside class="ev-r2"><div class="kp"><div><small>EV · valor ganado</small><b class="vEV">—</b></div><div><small>Avance = EV / BAC</small><b class="vAV">—</b></div><div><small>SPI = EV / PV</small><b class="vSPI">—</b></div><div><small>CPI = EV / AC</small><b class="vCPI">pendiente</b></div></div>
+        <div class="in2"><label>PV (valor planificado, h) <input type="number" id="pv" value="${PV0}" step="0.1" min="0"></label><label>AC (horas reales, h) <input type="number" id="ac" placeholder="registrar horas" step="0.5" min="0"></label></div>
+        <div class="vd"></div><div class="call warn"><b>Antes de reportarlo</b>${fmt(A.evm.rows.find((r) => r[0].startsWith("AC"))[2])}. El SPI mayor que 1 depende de porcentajes y horas que son <b>estimaciones del borrador</b>; no debe reportarse como resultado hasta validarlos con el grupo.</div>
+        <button type="button" class="btn" id="rs2">Restablecer al corte del 24 de octubre</button></aside></div>`;
+    const calc = () => { const ev = pk.reduce((a, p, i) => a + (p.h * pct[i]) / 100, 0), pv = +$("#pv", b).value || 0, ac = +$("#ac", b).value || 0, spi = pv ? ev / pv : 0;
+      $(".vEV", b).textContent = ev.toFixed(1) + " h"; $(".vAV", b).textContent = ((ev / BAC) * 100).toFixed(0) + " %"; $(".vSPI", b).textContent = spi.toFixed(2);
+      const cpi = ac ? ev / ac : null; $(".vCPI", b).textContent = cpi ? cpi.toFixed(2) : "pendiente";
+      const eac = cpi ? BAC / cpi : null;
+      $(".vd", b).innerHTML = `<p>${spi >= 1 ? `<b class="okc">Adelantados:</b> debíamos llevar ${pv} h a hoy y llevamos ${ev.toFixed(1)} h.` : `<b class="badc">Atrasados:</b> debíamos llevar ${pv} h y llevamos ${ev.toFixed(1)} h.`}</p>${cpi ? `<p>${cpi >= 1 ? "Gastamos menos de lo ganado" : "Gastamos más de lo ganado"} · <b>EAC = BAC / CPI = ${eac.toFixed(1)} h</b> si el desempeño de costo continúa.</p>` : `<p class="mut">CPI y EAC no se pueden calcular sin el costo real (AC): el grupo debe registrar las horas realmente trabajadas.</p>`}`;
+      const spiEl = $(".vSPI", b); spiEl.style.color = spi >= 1 ? "var(--ok)" : "var(--bad)"; };
+    $$("input[type=range]", b).forEach((inp) => ctx.on(inp, "input", () => { pct[+inp.dataset.i] = +inp.value; inp.nextElementSibling.textContent = inp.value + " %"; calc(); }));
+    ctx.on($("#pv", b), "input", calc); ctx.on($("#ac", b), "input", calc);
+    ctx.on($("#rs2", b), "click", () => { pk.forEach((p, i) => { pct[i] = p.pct; const inp = $$("input[type=range]", b)[i]; inp.value = p.pct; inp.nextElementSibling.textContent = p.pct + " %"; }); $("#pv", b).value = PV0; $("#ac", b).value = ""; calc(); });
+    calc();
+  });
+
+  /* ============ 21 · matriz poder / interés ============ */
+  K.add("int", "Matriz poder / interés", "interesados poder interés cuadrantes gestionar atentamente mantener informado monitorear mantener satisfecho", (b, ctx) => {
+    const sk = A.interesados.rows.map((r) => ({ id: r[0], name: r[1], tipo: r[2], exp: r[3], pw: K.num(r[4]), it: K.num(r[5]), q: r[6] }));
+    const strat = Object.fromEntries(A.estrategia.rows.map((r) => [r[0], r[3]])), CQ = { "Gestionar atentamente": "pink", "Mantener informado": "yellow", Monitorear: "green", "Mantener satisfecho": "blue" };
+    const groups = {}; sk.forEach((s) => (groups[s.pw + "," + s.it] = (groups[s.pw + "," + s.it] || []).concat(s)));
+    sk.forEach((s) => { const g = groups[s.pw + "," + s.it]; s.k = g.indexOf(s); s.n = g.length; });
+    const XM = { 1: 10, 2: 24, 3: 40, 4: 64, 5: 86 }, YM = { 5: 14, 4: 36, 3: 60, 2: 76, 1: 90 };   // 4 y 5 = alto: quedan en la mitad de arriba / derecha
+    const X = (s) => XM[s.it] + (s.n > 1 ? (s.k - (s.n - 1) / 2) * 4.6 : 0), Y = (s) => YM[s.pw] + (s.n > 1 ? (s.k % 2 ? 4.5 : -4.5) : 0);
+    b.innerHTML = `<div class="mx"><div class="mx-p"><div class="q q1"><span>Mantener satisfecho</span></div><div class="q q2"><span>Gestionar atentamente</span></div><div class="q q3"><span>Monitorear</span></div><div class="q q4"><span>Mantener informado</span></div>
+        <span class="ax x">Interés →</span><span class="ax y">Poder →</span>${sk.map((s, i) => `<button type="button" class="pt" style="left:${X(s)}%;top:${Y(s)}%;--c:var(--c-${CQ[s.q]});--d:${i * 60}ms" data-i="${i}" title="${esc(s.name)}">${s.id.replace("STK-", "")}</button>`).join("")}</div>
+      <aside class="mx-d"></aside></div><p class="foot">Regla de cuadrantes: alto = 4 o 5. Poder e interés son una valoración inicial del grupo y deben validarse.</p>`;
+    const d = $(".mx-d", b), pts = $$(".pt", b);
+    const show = (i) => { const s = sk[i]; pts.forEach((p, k) => p.classList.toggle("sel", k === i));
+      d.innerHTML = `<span class="badge" style="background:var(--c-${CQ[s.q]})">${esc(s.q)}</span><h3>${esc(s.id)} · ${fmt(s.name)}</h3><p class="mut">${esc(s.tipo)} · poder ${s.pw} · interés ${s.it}</p><h4>Expectativa principal</h4><p>${fmt(s.exp)}</p><h4>Estrategia</h4><p class="strat">${fmt(strat[K.plain(s.name)] || strat[s.name] || "")}</p>`; };
+    pts.forEach((p, i) => ctx.on(p, "click", () => show(i)));
+    ctx.builds(2, (i) => { $(".mx-p", b).classList.toggle("pts", i === 1); }); show(0);
+  });
+
+  /* ============ 22 · estrategia por interesado ============ */
+  K.add("int", "Estrategia por interesado", "estrategia interesados cuadrante docentes equipo Grupo 8 ministerio hospitales seguro social centros organismos aseguradoras pacientes", (b, ctx) => {
+    const order = ["Gestionar atentamente", "Mantener informado", "Monitorear", "Mantener satisfecho"], CQ = { "Gestionar atentamente": "pink", "Mantener informado": "yellow", Monitorear: "green", "Mantener satisfecho": "blue" };
+    b.innerHTML = `<div class="est">${order.map((q, i) => `<section style="--c:var(--c-${CQ[q]});--d:${i * 100}ms"><h3>${q} <small>${A.estrategia.rows.filter((r) => r[2] === q).length}</small></h3>${A.estrategia.rows.filter((r) => r[2] === q).map((r) => `<article><b>${fmt(r[0])}</b><span>${fmt(r[3])}</span></article>`).join("") || '<p class="mut">Ningún interesado cae en este cuadrante.</p>'}</section>`).join("")}</div>`;
+    const c = $$(".est > section", b); ctx.builds(4, (i) => c.forEach((e, k) => e.classList.toggle("on", k <= i)));
+  });
+
+  /* ============ 23 · plan de comunicaciones ============ */
+  K.add("int", "Plan de comunicaciones", "comunicaciones plantilla S13 a quién qué cuándo cómo quién formato reglas", (b, ctx) => {
+    const t = A.comunicaciones;
+    b.innerHTML = `<div class="com"><div class="com-t">${K.tbl(t, { cols: [0, 2, 3, 4, 5], rowCls: () => "clk", heads: { 0: "A quién", 2: "Qué", 3: "Cuándo", 4: "Cómo", 5: "Quién" } })}</div><aside class="com-d"></aside></div>
+      <div class="reglas">${A.reglas_com.map((r, i) => `<div><i>${i + 1}</i><span>${fmt(r)}</span></div>`).join("")}</div>`;
+    const rows = $$("tbody tr", b), d = $(".com-d", b);
+    const show = (i) => { rows.forEach((r, k) => r.classList.toggle("sel", k === i)); const r = t.rows[i];
+      d.innerHTML = `<h3>${fmt(r[0])}</h3><h4>Expectativa (por qué)</h4><p>${fmt(r[1])}</p><h4>Formato (plantilla)</h4><p>${fmt(r[6])}</p>`; };
+    rows.forEach((r, i) => ctx.on(r, "click", () => show(i))); ctx.builds(rows.length, show);
+  });
+
+  /* ============ 24 · reporte de estado ============ */
+  K.add("int", "Reporte de estado (plantilla de la sesión 13)", "reporte de estado CPI SPI EAC avance desempeño riesgos acciones corte 24 octubre", (b, ctx) => {
+    const g = (k) => A.reporte.rows.find((r) => r[0] === k)[1], T = A.reporte_texto;
+    b.innerHTML = `<div class="rep"><div class="rep-h">${["Proyecto", "Período", "Para", "Elabora"].map((k) => `<div><small>${k}</small><b>${fmt(g(k))}</b></div>`).join("")}</div>
+      <div class="rep-k"><div class="k ok"><small>Avance = EV / BAC</small><b>${K.plain(g("Avance")).split("(")[0].trim()}</b></div><div class="k ok"><small>SPI</small><b>${K.plain(g("SPI")).split(" ")[0]}</b><span>EV 110.1 h / PV 86.6 h</span></div><div class="k pend"><small>CPI</small><b>pendiente</b><span>falta el costo real (AC)</span></div><div class="k pend"><small>EAC</small><b>pendiente</b><span>requiere CPI · BAC = ${BAC} h</span></div></div>
+      <div class="rep-c"><section><h3>Desempeño</h3><p>${fmt(T["Desempeño"])}</p></section><section><h3>Riesgos principales</h3><p>${fmt(T["Riesgos principales"])}</p></section><section><h3>Acciones y decisiones</h3><p>${fmt(T["Acciones y decisiones"])}</p></section></div>
+      <p class="foot">Borrador generado con IA: <b>sí</b> · Verificado por: ____________________ · Fecha: ____________. Corte: 24 de octubre de 2026; el SPI está sujeto a validar los porcentajes de avance.</p></div>`;
+    const c = $$(".rep-c section", b); ctx.builds(4, (i) => { $(".rep-k", b).classList.add("on"); c.forEach((e, k) => e.classList.toggle("on", k < i)); });
+  });
+})();
+
+</script>
+<script>
+/* Diapositivas 25 a 40: riesgos, calidad, normas, cierre y preguntas. */
+(function () {
+  "use strict";
+  const K = window.K, A = K.A, esc = K.esc, fmt = K.fmt, $ = K.$, $$ = K.$$;
+  const COL = { ok: "Cumple", run: "En curso", pend: "Pendiente" };
+  const st = (txt) => { const s = K.status(txt); return `<span class="badge ${s}">${COL[s]}</span>`; };
+  const LV = { Alta: 3, Alto: 3, Media: 2, Medio: 2, Baja: 1, Bajo: 1 };
+  const rk = A.riesgos.rows.map((r) => ({ id: r[0], cat: r[1], name: r[2], p: r[3], i: r[4], lv: K.plain(r[5]), why: r[6], resp: r[7], who: r[8], h: K.num(r[9]) || 0 }));
+  const LC = { Crítico: "pink", Alto: "orange", Medio: "yellow", Bajo: "green" };
+
+  /* ============ 25 · ciclo del riesgo ============ */
+  K.add("rie", "El ciclo del riesgo (ISO 21502 §7.8 · NIST 800-30)", "ciclo riesgos preparar conducir comunicar mantener NIST 800-30 ISO 21502 matriz 3x3 horizonte", (b, ctx) => {
+    const st4 = [["Preparar", "blue", "1"], ["Conducir", "purple", "2"], ["Comunicar", "orange", "3"], ["Mantener", "green", "4"]];
+    b.innerHTML = `<div class="cic">${st4.map(([k, c, n], i) => `<article style="--c:var(--c-${c});--d:${i * 90}ms"><header><i>${n}</i><b>${k}</b></header><p>${fmt(A.ciclo_riesgos[k])}</p></article>`).join("")}</div>
+      <p class="foot">NIST SP 800-30 Rev. 1 organiza la evaluación en cuatro pasos; ISO 21502 §7.8 exige identificar, valorar y responder a los riesgos durante todo el proyecto.</p>`;
+    const c = $$(".cic article", b); ctx.builds(5, (i) => c.forEach((e, k) => e.classList.toggle("on", i === 4 || k === i)));
+  });
+
+  /* ============ 26 · matriz 3x3 ============ */
+  K.add("rie", "Matriz de riesgos 3×3 y RBS", "matriz probabilidad impacto 3x3 RBS categorías crítico alto medio bajo riesgos R2 R14", (b, ctx) => {
+    const cell = {}; rk.forEach((r) => { const k = LV[r.p] + "," + LV[r.i]; (cell[k] = cell[k] || []).push(r); });
+    const bg = (p, i) => { const s = p * i; return s >= 9 ? "#f2b3ad" : s >= 6 ? "#f4c9a0" : s >= 3 ? "#f6e2a8" : "#dcebc8"; };
+    let sel = null;
+    b.innerHTML = `<div class="mz"><div class="mz-g"><span class="ya">Probabilidad ↑</span>${[3, 2, 1].map((p) => [1, 2, 3].map((i) => `<div class="mc" style="background:${bg(p, i)}">${(cell[p + "," + i] || []).map((r) => `<button type="button" class="rp" data-id="${r.id}" style="--c:var(--c-${LC[r.lv]})">${r.id}</button>`).join("")}</div>`).join("")).join("")}<span class="xa">Impacto →</span></div>
+      <aside class="mz-d"><div class="mz-rbs"><h4>RBS · categorías</h4>${A.rbs.rows.map((r) => `<span class="rb"><b>${esc(r[0])}</b> ${esc(r[1])}</span>`).join("")}</div><div class="mz-i"></div></aside></div>`;
+    const d = $(".mz-i", b), show = (id) => { const r = rk.find((x) => x.id === id); $$(".rp", b).forEach((e) => e.classList.toggle("sel", e.dataset.id === id));
+      d.innerHTML = `<span class="badge" style="background:var(--c-${LC[r.lv]})">${esc(r.lv)}</span><h3>${r.id} · ${esc(r.cat)}</h3><p>${fmt(r.name)}</p><p class="mut">Prob. ${r.p} · Impacto ${r.i} · ${r.h} h de reserva</p><p><b>Porque:</b> ${fmt(r.why)}</p>`; };
+    $$(".rp", b).forEach((e) => ctx.on(e, "click", () => show(e.dataset.id))); show("R2");
+  });
+
+  /* ============ 27 · registro de riesgos ============ */
+  K.add("rie", "Registro de riesgos y respuestas", "registro de riesgos R2 R14 estrategia mitigar evitar transferir aceptar respuesta responsable reserva horas", (b, ctx) => {
+    let f = "Todos"; const levels = ["Todos", "Crítico", "Alto", "Medio", "Bajo"];
+    b.innerHTML = `<div class="rg"><div class="chips">${levels.map((l) => `<button type="button" class="chip" data-l="${l}" aria-pressed="${l === f}">${l}</button>`).join("")}</div><div class="rg-b"><div class="rg-t"></div><aside class="rg-d"></aside></div></div>`;
+    const t = $(".rg-t", b), d = $(".rg-d", b), show = (r) => { $$(".rg-t tr[data-id]", b).forEach((x) => x.classList.toggle("sel", x.dataset.id === r.id));
+      d.innerHTML = `<span class="badge" style="background:var(--c-${LC[r.lv]})">${esc(r.lv)}</span><h3>${r.id} · ${fmt(r.name)}</h3><h4>Por qué</h4><p>${fmt(r.why)}</p><h4>Respuesta</h4><p>${fmt(r.resp)}</p><p class="mut">Responsable: ${esc(r.who)} · Reserva: ${r.h} h</p>`; };
+    const draw = () => { const rows = rk.filter((r) => f === "Todos" || r.lv === f);
+      t.innerHTML = `<table class="dt"><thead><tr><th>Id</th><th>Riesgo</th><th>P</th><th>I</th><th>Nivel</th><th>h</th></tr></thead><tbody>${rows.map((r) => `<tr class="clk" data-id="${r.id}"><td><b>${r.id}</b></td><td>${fmt(r.name.length > 62 ? r.name.slice(0, 61) + "…" : r.name)}</td><td>${esc(r.p)}</td><td>${esc(r.i)}</td><td><span class="badge" style="background:var(--c-${LC[r.lv]})">${esc(r.lv)}</span></td><td class="n">${r.h}</td></tr>`).join("")}</tbody></table>`;
+      $$("tr[data-id]", t).forEach((tr) => tr.onclick = () => show(rk.find((x) => x.id === tr.dataset.id)));
+      $$(".chip", b).forEach((c) => c.setAttribute("aria-pressed", c.dataset.l === f)); if (rows[0]) show(rows[0]); else d.innerHTML = '<p class="mut">Sin riesgos en este nivel.</p>'; };
+    $$(".chip", b).forEach((c) => ctx.on(c, "click", () => { f = c.dataset.l; draw(); })); draw();
+  });
+
+  /* ============ 28 · modelo NIST ============ */
+  K.add("rie", "Modelo NIST: del evento al impacto", "NIST 800-30 fuente de amenaza evento vulnerabilidad condición predisponente impacto adverso probabilidad severidad CVSS no es riesgo", (b, ctx) => {
+    const rows = A.nist.rows; let cur = 0;
+    b.innerHTML = `<div class="nst"><div class="chips">${rows.map((r, i) => `<button type="button" class="chip" data-i="${i}" aria-pressed="${i === 0}">${esc(r[0])}</button>`).join("")}</div><div class="nst-f"></div><div class="call info"><b>Severidad no es riesgo</b>${fmt(A.ciclo_riesgos.Conducir.split("Se recuerda que")[1] || "")}</div></div>`;
+    const f = $(".nst-f", b), L = ["Fuente de amenaza", "Evento de amenaza", "Vulnerabilidad", "Condición predisponente", "Probabilidad", "Impacto adverso"], CC = ["pink", "orange", "yellow", "green", "blue", "purple"];
+    const draw = (n) => { cur = n; const r = rows[n]; f.innerHTML = r.slice(1).map((v, i) => `<div class="nb" style="--c:var(--c-${CC[i]});--d:${i * 80}ms"><small>${L[i]}</small><p>${fmt(v)}</p></div>`).join(""); $$(".chip", b).forEach((c) => c.setAttribute("aria-pressed", +c.dataset.i === n)); };
+    $$(".chip", b).forEach((c) => ctx.on(c, "click", () => draw(+c.dataset.i))); draw(0);
+  });
+
+  /* ============ 29 · contingencia y oportunidades ============ */
+  K.add("rie", "Plan de contingencia y oportunidades", "contingencia disparador método alternativo oportunidades compartir reserva de contingencia gestión", (b, ctx) => {
+    b.innerHTML = `<div class="ctg"><section><h3>Si pasa esto… hacemos esto</h3>${A.contingencia.rows.map((r) => `<article><b>${esc(r[0])}</b><div><small>Disparador</small><p>${fmt(r[1])}</p></div><div class="arr">→</div><div><small>Método alternativo</small><p>${fmt(r[2])}</p></div><em>${esc(r[3])}</em></article>`).join("")}</section>
+      <section class="op"><h3>Oportunidades</h3>${A.oportunidades.rows.map((r) => `<article><b>${esc(r[0])} · ${esc(r[2])}</b><p>${fmt(r[1])}</p><small>${fmt(r[3])}</small></article>`).join("")}</section></div>`;
+    const a = $$(".ctg article", b); ctx.builds(a.length + 1, (i) => a.forEach((e, k) => e.classList.toggle("on", i === a.length || k < i)));
+  });
+
+  /* ============ 30 · inventario CVE ============ */
+  K.add("rie", "Inventario de equipos y CVE", "inventario equipos CVE CVSS NVD macOS riesgo residual parte B vulnerabilidad vigente actualizaciones", (b, ctx) => {
+    const rows = A.inventario.rows;
+    b.innerHTML = `<div class="inv">${rows.map((r, i) => `<article style="--d:${i * 100}ms"><header><i>${esc(r[0])}</i><b>${esc(r[1])}</b><small>compilación ${esc(r[2])}</small></header><h4>Frente a la vulnerabilidad base</h4><p>${fmt(r[3])}</p><h4>Decisión</h4><p>${fmt(r[4])}</p><h4>CVE vigente de su versión</h4><p>${fmt(r[5])}</p></article>`).join("")}</div>
+      <p class="foot">CVSS mide <b>severidad</b> de la vulnerabilidad; el <b>riesgo</b> depende además de si el equipo está expuesto. Fuente: NVD.</p>`;
+    const a = $$(".inv article", b); ctx.builds(a.length + 1, (i) => a.forEach((e, k) => e.classList.toggle("on", i === a.length || k < i)));
+  });
+
+  /* ============ 31 · especificación de calidad ============ */
+  K.add("cal", "Especificación de calidad medible", "calidad especificación atributo unidad cómo se mide mínimo meta estado fiabilidad ISO 25010 ISO 21502 §7.11", (b, ctx) => {
+    const rows = A.calidad.rows, c = { ok: 0, run: 0, pend: 0 }; rows.forEach((r) => c[K.status(r[5])]++);
+    b.innerHTML = `<div class="ql"><div class="ql-s"><span class="badge ok">${c.ok} cumplen</span><span class="badge run">${c.run} en curso</span><span class="badge pend">${c.pend} pendientes</span></div><div class="ql-t">${K.tbl(A.calidad, { fmt: (v, ci) => (ci === 5 ? `${st(v)} <small>${fmt(v.replace(/^\*\*[^*]+\*\*:?\s*/, ""))}</small>` : fmt(v)), num: false })}</div></div>`;
+  });
+
+  /* ============ 32 · dominios ============ */
+  K.add("cal", "La calidad en los siete dominios del PMBOK 8", "PMBOK 8 dominios calidad gobernanza alcance cronograma finanzas recursos riesgo interesados", (b, ctx) => {
+    const rows = A.dominios.rows, CC = ["blue", "purple", "green", "teal", "yellow", "orange", "pink"];
+    b.innerHTML = `<div class="dom">${rows.map((r, i) => `<article style="--c:var(--c-${CC[i % 7]});--d:${i * 70}ms"><b>${esc(r[0])}</b><em>${fmt(r[1])}</em><p>${fmt(r[2])}</p></article>`).join("")}</div>`;
+    const a = $$(".dom article", b); ctx.builds(a.length + 1, (i) => a.forEach((e, k) => e.classList.toggle("on", i === a.length || k < i)));
+  });
+
+  /* ============ 33 · normas ============ */
+  K.add("cal", "Normas y estándares: dónde se aplica cada una", "normas estándares PMBOK ISO 21502 ISO 25010 NIST CVSS CVE Scrum Guide IEEE", (b, ctx) => {
+    const rows = A.normas.rows;
+    b.innerHTML = `<div class="nrm"><div class="nrm-l">${rows.map((r, i) => `<button type="button" data-i="${i}">${esc(r[0])}</button>`).join("")}</div><aside class="nrm-d"></aside></div>`;
+    const d = $(".nrm-d", b), bt = $$(".nrm-l button", b), show = (i) => { bt.forEach((x, k) => x.classList.toggle("sel", k === i)); const r = rows[i]; d.innerHTML = `<h3>${esc(r[0])}</h3><h4>Qué es</h4><p>${fmt(r[1])}</p><h4>Dónde la aplicamos en SISG</h4><p class="strat">${fmt(r[2])}</p>`; };
+    bt.forEach((x, i) => ctx.on(x, "click", () => show(i))); ctx.builds(rows.length, show);
+  });
+
+  /* ============ 34 · defectos y SUS ============ */
+  K.add("cal", "Defectos corregidos y prueba de usabilidad (SUS)", "defectos usabilidad SUS System Usability Scale cuestionario puntaje 68 tareas", (b, ctx) => {
+    const sc = A.sus.map(() => 3);
+    b.innerHTML = `<div class="sus"><div class="sus-l"><h3>Cuestionario SUS <small>1 = en desacuerdo · 5 = de acuerdo</small></h3>${A.sus.map((q, i) => `<label><span>${i + 1}. ${esc(q)}</span><input type="range" min="1" max="5" step="1" value="3" data-i="${i}"><b>3</b></label>`).join("")}</div>
+      <aside class="sus-r"><div class="gauge"><svg viewBox="0 0 200 120"><path class="gb" d="M20 100 A80 80 0 0 1 180 100"/><path class="gf" d="M20 100 A80 80 0 0 1 180 100" pathLength="100" stroke-dasharray="0 100"/></svg><div class="gv"><b>0</b><span>puntaje SUS (0–100)</span></div></div><p class="fx">Impares: (respuesta − 1) · Pares: (5 − respuesta) · suma × 2.5. Un puntaje de 68 o más se considera aceptable.</p>
+      <h4>Defectos ya corregidos</h4>${A.defectos.rows.map((r) => `<div class="df"><b>${fmt(r[0])}</b><span>${fmt(r[2])}</span></div>`).join("")}</aside></div>`;
+    const calc = () => { const s = sc.reduce((a, v, i) => a + (i % 2 === 0 ? v - 1 : 5 - v), 0) * 2.5; $(".gv b", b).textContent = s.toFixed(1); const f = $(".gf", b); f.style.strokeDasharray = `${s} 100`; f.style.stroke = s >= 68 ? "var(--ok)" : "var(--bad)"; };
+    $$("input", b).forEach((inp) => ctx.on(inp, "input", () => { sc[+inp.dataset.i] = +inp.value; inp.nextElementSibling.textContent = inp.value; calc(); })); requestAnimationFrame(calc);
+  });
+
+  /* ============ 35 · declaración de IA ============ */
+  K.add("cie", "Declaración de uso de IA", "declaración de uso de inteligencia artificial apéndice 60% nota herramienta modelo verificación", (b, ctx) => {
+    b.innerHTML = `<div class="ia"><div class="ia-t">${A.declaracion_ia.rows.map((r, i) => `<div style="--d:${i * 80}ms"><b>${fmt(r[0])}</b><p>${fmt(r[1])}</p></div>`).join("")}</div><div class="call warn"><b>Regla del curso</b>Omitir la declaración de uso de IA limita la nota máxima al <strong>60 %</strong> (riesgo R8). El apéndice se adjunta a cada entrega.</div></div>`;
+    const a = $$(".ia-t > div", b); ctx.builds(a.length + 1, (i) => a.forEach((e, k) => e.classList.toggle("on", i === a.length || k < i)));
+  });
+
+  /* ============ 36 · pendientes ============ */
+  K.add("cie", "Pendientes y cómo se cierran", "pendientes quién cómo se cierra roles acta Word laboratorio A1-b horas reales", (b, ctx) => {
+    b.innerHTML = `<div class="pnd">${A.pendientes.rows.map((r, i) => `<label class="pd"><input type="checkbox" data-k="p${i}"><span><b>${fmt(r[0])}</b><small>${esc(r[1])} · ${fmt(r[2])}</small></span></label>`).join("")}</div><p class="foot">Marca lo que ya esté cerrado; se guarda en este navegador.</p>`;
+    $$("input", b).forEach((c) => { c.checked = K.store.get("pd:" + c.dataset.k, false); ctx.on(c, "change", () => { K.store.set("pd:" + c.dataset.k, c.checked); c.closest(".pd").classList.toggle("done", c.checked); }); c.closest(".pd").classList.toggle("done", c.checked); });
+  });
+
+  /* ============ 37 · lecciones ============ */
+  K.add("cie", "Lecciones aprendidas", "lecciones aprendidas cierre proceso resultados mejoras", (b) => {
+    const raw = (A.notas["Lecciones aprendidas"] || "").replace(/\s+/g, " ").trim(), cut = raw.split("Lo que haríamos distinto:");
+    const split = (x) => x.replace(/^Lo que funcionó:\s*/, "").split(/;\s*|,\s+y\s+(?=[a-záéíóú]+\s)/).map((y) => y.trim().replace(/\.$/, "")).filter(Boolean);
+    const cols = [["Lo que funcionó", "lime", split(cut[0])], ["Lo que haríamos distinto", "rose", split(cut[1] || "")]];
+    b.innerHTML = `<div class="les">${cols.map(([t, c, it]) => `<section style="--c:var(--${c})"><h3>${t}</h3><ul>${it.map((x) => `<li>${fmt(x.charAt(0).toUpperCase() + x.slice(1))}</li>`).join("")}</ul></section>`).join("")}</div><div class="call info"><b>Avance posterior</b>${fmt(A.avance_posterior.replace("Avance posterior: ", "").replace(/^./, (m) => m.toUpperCase()))}</div>`;
+  });
+
+  /* ============ 38 · preguntas ============ */
+  K.add("cie", "Preguntas frecuentes de la exposición", "preguntas respuestas metodología normas híbrido Scrum riesgos calidad PERT", (b, ctx) => {
+    const qs = [...A.preguntas_metodologia.rows, ...A.preguntas_mas.rows]; let i = 0, open = false;
+    b.innerHTML = `<div class="qa"><div class="qa-l">${qs.map((q, k) => `<button type="button" data-k="${k}">${esc(q[0])}</button>`).join("")}</div><aside class="qa-d"></aside></div>`;
+    const d = $(".qa-d", b), bt = $$(".qa-l button", b), show = (k) => { i = k; bt.forEach((x, n) => x.classList.toggle("sel", n === k)); d.innerHTML = `<h3>${esc(qs[k][0])}</h3><p>${fmt(qs[k][1])}</p>`; };
+    bt.forEach((x, k) => ctx.on(x, "click", () => show(k))); show(0);
+  });
+
+  /* ============ 39 · referencias ============ */
+  K.add("cie", "Referencias", "referencias bibliografía OPS PMI PMBOK ISO NIST", (b) => {
+    b.innerHTML = `<ol class="refs">${A.referencias.map((r) => `<li>${fmt(r.replace(/^\[?\d+\]?\.?\s*/, ""))}</li>`).join("")}</ol>`;
+  });
+
+  /* ============ 40 · cierre ============ */
+  K.add("cie", "Cierre: qué se lleva el curso", "cierre conclusión gracias resumen decisiones", (b, ctx) => {
+    const c = A.cifras;
+    b.innerHTML = `<div class="fin"><div class="fin-k">${[[c.bac + " h", "presupuesto base (BAC)"], ["20", "paquetes de trabajo"], ["13", "riesgos registrados"], ["12", "interesados"], ["74 %", "probabilidad de cumplir BD II"]].map(([v, l], i) => `<div style="--d:${i * 90}ms"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      <div class="call ok"><b>Mensaje final</b>Un enfoque híbrido —Fase 0 predictiva y sprints ágiles— apoyado en PMBOK 8, ISO 21502, ISO/IEC 25010 y NIST 800-30, con números que se pueden recalcular y riesgos con dueño y reserva.</div><p class="foot">Grupo 4 · ${esc(A.curso)} · ${esc(A.docentes[0])}</p></div>`;
+    const a = $$(".fin-k > div", b); ctx.builds(2, (i) => a.forEach((e) => e.classList.toggle("on", i === 1)));
+    ctx.timeout(80, 80);
+  });
+})();
+
+</script>
+<script>
+(function () {
+  const set = (t) => { document.documentElement.dataset.theme = t; try { localStorage.setItem("sisgapt:theme", JSON.stringify(t)); } catch (e) {} };
+  let t = null; try { t = JSON.parse(localStorage.getItem("sisgapt:theme")); } catch (e) {}
+  set(t || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+  document.getElementById("b-theme").addEventListener("click", () => set(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+  window.K.start();
+})();
+</script>
+</body>
+</html>
