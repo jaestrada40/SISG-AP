@@ -91,8 +91,8 @@
     const list = (arr) => `<ul>${arr.map((x) => `<li>${fmt(x.charAt(0).toUpperCase() + x.slice(1))}</li>`).join("")}</ul>`;
     b.innerHTML = `<div class="sup"><section class="card"><h3>Supuestos</h3>${list(A.supuestos)}</section><section class="card"><h3>Restricciones</h3>${list(A.restricciones)}</section>
       <section class="card"><h3>Autoridad del director de proyecto</h3>${list(A.autoridad)}</section>
-      <section class="card roles"><h3>Roles</h3>${A.roles.rows.map((r) => `<div class="role"><b>${esc(r[0])}</b><span>${fmt(r[1])}</span>${K.badge("por asignar", "pend")}</div>`).join("")}
-        <small>La asignación de personas es una acción pendiente del grupo (acta, sección 9).</small></section></div>
+      <section class="card roles"><h3>Roles</h3>${A.roles.rows.map((r) => `<div class="role"><b>${esc(r[0])}</b><span>${fmt(r[1])}</span><em>${fmt(r[2])}</em></div>`).join("")}
+        <small>Roles asignados en el acta, sección 9.</small></section></div>
       <p class="foot">Equipo: ${esc(A.miembros)}.</p>`;
     const c = $$(".sup > section", b); ctx.builds(4, (i) => c.forEach((e, k) => e.classList.toggle("on", k <= i)));
   });

@@ -136,7 +136,7 @@ body.dk-full .top { display: none; } body.dk-full #app { grid-template-rows: min
 
 /* supuestos */
 .sup { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } .sup section { opacity: .12; transform: translateY(10px); transition: .5s; } .sup section.on { opacity: 1; transform: none; }
-.sup li { font-size: 13.5px; } .roles .role { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 6px 0; border-bottom: 1px solid var(--line); } .roles .role span { grid-column: 1; color: var(--muted); font-size: 12.5px; } .roles .role .badge { grid-row: 1 / 3; grid-column: 2; align-self: center; } .roles small { display: block; margin-top: 8px; }
+.sup li { font-size: 13.5px; } .roles .role { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 6px 0; border-bottom: 1px solid var(--line); } .roles .role span { grid-column: 1; color: var(--muted); font-size: 12.5px; } .roles .role em { grid-row: 1 / 3; grid-column: 2; align-self: center; font-style: normal; font-size: 12.5px; text-align: right; } .roles .role .badge { grid-row: 1 / 3; grid-column: 2; align-self: center; } .roles small { display: block; margin-top: 8px; }
 
 /* hitos */
 .tl { position: relative; height: 270px; margin: 8px 0 4px; }
