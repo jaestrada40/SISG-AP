@@ -110,9 +110,14 @@
       <button type="button" id="dk-prev" title="Anterior (←)" aria-label="Anterior">←</button><button type="button" id="dk-next" title="Siguiente (→)" aria-label="Siguiente">→</button>
       <button type="button" id="dk-idx" title="Índice (I)">Índice</button><button type="button" id="dk-full" title="Pantalla completa (F)">Pantalla completa</button></div>
       <div class="dk-view"><div class="dk-slide" id="dk-slide"></div></div><div class="dk-bar"><i></i></div>
-      <aside id="dk-index" hidden><h3>Diapositivas</h3>${K.slides.map((s, i) => `<button type="button" data-i="${i}"><i>${String(i + 1).padStart(2, "0")}</i>${esc(s.title)}</button>`).join("")}</aside>`;
+      <aside id="dk-index" hidden><h3>Diapositivas</h3><input type="search" id="dk-q" placeholder="Buscar (/)  ·  PERT, riesgo, CPI…" autocomplete="off" aria-label="Buscar diapositiva">${K.slides.map((s, i) => `<button type="button" data-i="${i}"><i>${String(i + 1).padStart(2, "0")}</i>${esc(s.title)}</button>`).join("")}</aside>`;
     K.$("#dk-prev", el).onclick = prev; K.$("#dk-next", el).onclick = next;
     K.$("#dk-idx", el).onclick = () => { const x = K.$("#dk-index", el); x.hidden = !x.hidden; if (!x.hidden) { const c = K.$('[aria-current="true"]', x); if (c) c.scrollIntoView({ block: "center" }); } };
+    const norm = (s) => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), q = K.$("#dk-q", el), idxB = K.$$("#dk-index button", el);
+    const hay = K.slides.map((s) => norm(s.title + " " + (s.text || "")));
+    const filtra = () => { const t = norm(q.value).split(/\s+/).filter(Boolean); idxB.forEach((b, i) => { b.hidden = !t.every((w) => hay[i].includes(w)); }); };
+    q.oninput = filtra;
+    q.onkeydown = (e) => { if (e.key === "Enter") { const b = idxB.find((x) => !x.hidden); if (b) b.click(); } else if (e.key === "Escape") { q.value = ""; filtra(); K.$("#dk-index", el).hidden = true; q.blur(); } };
     K.$$("#dk-index button", el).forEach((b) => (b.onclick = () => { K.$("#dk-index", el).hidden = true; K.go(+b.dataset.i + 1); }));
     K.$("#dk-full", el).onclick = toggleFull;
     addEventListener("resize", fit); new ResizeObserver(fit).observe(K.$(".dk-view", el));
@@ -126,6 +131,7 @@
       else if (e.key === "Home") K.go(1); else if (e.key === "End") K.go(K.slides.length);
       else if (e.key === "f" || e.key === "F") toggleFull();
       else if (e.key === "i" || e.key === "I") K.$("#dk-idx").click();
+      else if (e.key === "/") { e.preventDefault(); const x = K.$("#dk-index"); x.hidden = false; K.$("#dk-q").focus(); K.$("#dk-q").select(); }
       else if (e.key === "Escape" && !K.$("#dk-index").hidden) K.$("#dk-index").hidden = true;
     });
   }

@@ -9,7 +9,7 @@ normas, declaración de IA, lecciones y preguntas. Los datos salen de `../SISG/d
 - O con servidor: `python3 -m http.server 8770` y abrir <http://127.0.0.1:8770/>.
 
 ## Controles
-`→` / espacio avanzan (primero los pasos internos de cada diapositiva) · `←` retrocede · `I` índice · `F` pantalla completa · `Home` / `End`.
+`→` / espacio avanzan (primero los pasos internos de cada diapositiva) · `←` retrocede · `I` índice · `/` buscador (filtra por título y contenido; Enter abre la primera coincidencia) · `F` pantalla completa · `Home` / `End`.
 Hay botón de tema claro/oscuro. Las diapositivas con deslizadores (PERT, costos, valor ganado, SUS) se pueden mover para probar escenarios.
 
 ## Archivos
