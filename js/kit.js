@@ -110,12 +110,29 @@
       <button type="button" id="dk-prev" title="Anterior (←)" aria-label="Anterior">←</button><button type="button" id="dk-next" title="Siguiente (→)" aria-label="Siguiente">→</button>
       <button type="button" id="dk-idx" title="Índice (I)">Índice</button><button type="button" id="dk-full" title="Pantalla completa (F)">Pantalla completa</button></div>
       <div class="dk-view"><div class="dk-slide" id="dk-slide"></div></div><div class="dk-bar"><i></i></div>
-      <aside id="dk-index" hidden><h3>Diapositivas</h3><input type="search" id="dk-q" placeholder="Buscar (/)  ·  PERT, riesgo, CPI…" autocomplete="off" aria-label="Buscar diapositiva">${K.slides.map((s, i) => `<button type="button" data-i="${i}"><i>${String(i + 1).padStart(2, "0")}</i>${esc(s.title)}</button>`).join("")}</aside>`;
+      <aside id="dk-index" hidden><h3>Diapositivas</h3><input type="search" id="dk-q" placeholder="Buscar en todo el contenido (/)" autocomplete="off" aria-label="Buscar diapositiva"><div id="dk-nres"></div>${K.slides.map((s, i) => `<button type="button" data-i="${i}"><i>${String(i + 1).padStart(2, "0")}</i><span>${esc(s.title)}<small class="sn"></small></span></button>`).join("")}</aside>`;
     K.$("#dk-prev", el).onclick = prev; K.$("#dk-next", el).onclick = next;
     K.$("#dk-idx", el).onclick = () => { const x = K.$("#dk-index", el); x.hidden = !x.hidden; if (!x.hidden) { const c = K.$('[aria-current="true"]', x); if (c) c.scrollIntoView({ block: "center" }); } };
     const norm = (s) => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""), q = K.$("#dk-q", el), idxB = K.$$("#dk-index button", el);
-    const hay = K.slides.map((s) => norm(s.title + " " + (s.text || "")));
-    const filtra = () => { const t = norm(q.value).split(/\s+/).filter(Boolean); idxB.forEach((b, i) => { b.hidden = !t.every((w) => hay[i].includes(w)); }); };
+    /* Texto completo: se dibuja cada diapositiva fuera de pantalla (con todos sus pasos y botones de detalle) y se guarda su texto; se hace una sola vez, al primer uso. */
+    let hay = null;
+    const cosecha = (S) => {
+      const body = document.createElement("div"), txt = [S.title, S.text || ""], ta = document.createElement("textarea"), grab = () => { ta.innerHTML = body.innerHTML.replace(/<[^>]+>/g, " "); txt.push(ta.value); };
+      const c = { back: false, timer() {}, timeout() {}, cleanup() {}, onKey() {}, dispose() {}, on(e, ev, f) { e.addEventListener(ev, f); }, builds(n, f) { for (let k = 0; k < n; k++) { f(k); grab(); } } };
+      try { S.render(body, c); grab(); body.querySelectorAll("button:not([data-go]):not(.btn)").forEach((b) => { b.click(); grab(); }); } catch (e) { /* una diapositiva que falle conserva el texto ya obtenido */ }
+      return txt.join(" \n ").replace(/\s+/g, " ");
+    };
+    const filtra = () => {
+      if (!hay) hay = K.slides.map((s) => { const raw = cosecha(s); return { raw, n: norm(raw) }; });
+      const t = norm(q.value).split(/\s+/).filter(Boolean); let c = 0;
+      idxB.forEach((b, i) => {
+        const h = hay[i], ok = t.every((w) => h.n.includes(w)), sn = K.$(".sn", b); b.hidden = !ok; if (ok) c++;
+        if (!ok || !t.length) { sn.textContent = ""; return; }
+        const p = Math.max(0, h.n.indexOf(t[0]) - 28); /* shortcut: sin conteo de coincidencias; una diapositiva con pasos repite su texto al cosecharlo */
+        sn.textContent = "…" + h.raw.slice(p, p + 90) + "…";
+      });
+      K.$("#dk-nres", el).textContent = t.length ? c + " de " + K.slides.length + " diapositivas" : "";
+    };
     q.oninput = filtra;
     q.onkeydown = (e) => { if (e.key === "Enter") { const b = idxB.find((x) => !x.hidden); if (b) b.click(); } else if (e.key === "Escape") { q.value = ""; filtra(); K.$("#dk-index", el).hidden = true; q.blur(); } };
     K.$$("#dk-index button", el).forEach((b) => (b.onclick = () => { K.$("#dk-index", el).hidden = true; K.go(+b.dataset.i + 1); }));
